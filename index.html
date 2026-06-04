@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>あなたの1秒って</title>
+  <!-- version: v1.13 reviewed / ranking / single index.html -->
   <style>
     :root {
       --bg: #f5f2ea;
@@ -466,6 +467,135 @@
     }
 
 
+    .player-box,
+    .stats-box,
+    .ranking-status {
+      border: 1px solid var(--line);
+      background: #fffdf7;
+      border-radius: 14px;
+      padding: 8px 10px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.45;
+      margin: 8px 0;
+    }
+
+    .ranking-area {
+      display: grid;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .ranking-card {
+      border: 1px solid var(--line);
+      background: #fffdf7;
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .ranking-card h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .ranking-list {
+      display: grid;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    .ranking-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px;
+      align-items: center;
+      border-top: 1px solid rgba(228, 220, 205, 0.7);
+      padding-top: 6px;
+      line-height: 1.35;
+    }
+
+    .ranking-row:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .ranking-rank,
+    .ranking-score {
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .ranking-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(45, 42, 36, 0.42);
+    }
+
+    .modal-backdrop[hidden] {
+      display: none;
+    }
+
+    .name-modal {
+      width: min(100%, 390px);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 18px 16px;
+    }
+
+    .name-modal h2 {
+      margin: 0 0 10px;
+      text-align: center;
+      font-size: 1.35rem;
+    }
+
+    .name-modal p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .name-input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px 12px;
+      font: inherit;
+      font-size: 1rem;
+      background: #fffdf7;
+      color: var(--text);
+      -webkit-user-select: text;
+      user-select: text;
+      -webkit-touch-callout: default;
+    }
+
+    .name-error {
+      min-height: 1.4em;
+      color: var(--danger);
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-align: center;
+      margin: 8px 0 0;
+    }
+
+
     @supports not (height: 100svh) {
       html,
       body {
@@ -548,7 +678,16 @@
         padding: 5px 10px;
       }
     }
-  </style>
+
+    .lab-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--accent-dark);
+    }
+
+</style>
 </head>
 <body data-screen="home">
   <main class="app" aria-live="polite">
@@ -556,6 +695,8 @@
       <div class="card home-card">
         <h1 class="title">あなたの<br />1秒って</h1>
         <div id="bestDisplay" class="best-box">ベストスコア（合計誤差）：まだありません</div>
+        <div id="playerNameDisplay" class="player-box" hidden></div>
+        <div id="gameStats" class="stats-box" hidden></div>
         <p class="lead">
           最初の3秒だけ時計が見えます。<br />
           そのあとは自分の感覚だけで、<br />
@@ -572,6 +713,7 @@
         <div class="button-stack">
           <button id="startBtn" class="btn primary" type="button">ゲームスタート</button>
           <button id="shareGameBtn" class="btn secondary" type="button">ゲームをシェア</button>
+        <a class="btn secondary lab-button" href="https://chameleonjp.codeberg.page/chameleonjp_lab/" target="_self" rel="noopener">他のゲームで遊ぶ</a>
         </div>
       </div>
     </section>
@@ -611,6 +753,17 @@
         <div id="finalScore" class="final-score"></div>
         <div id="senseScore" class="sense-score" hidden></div>
         <div id="bestUpdate" class="best-update" hidden>ベスト更新！</div>
+        <div id="rankingStatus" class="ranking-status" hidden></div>
+        <div id="rankingArea" class="ranking-area" hidden>
+          <div class="ranking-card">
+            <h3>ベストランキング</h3>
+            <div id="bestRankingList" class="ranking-list"></div>
+          </div>
+          <div class="ranking-card">
+            <h3>初回ランキング</h3>
+            <div id="firstRankingList" class="ranking-list"></div>
+          </div>
+        </div>
         <div class="button-stack">
           <button id="shareResultBtn" class="btn secondary" type="button">ゲーム結果をシェア</button>
           <button id="retryBtn" class="btn primary" type="button">もう一度プレイ</button>
@@ -620,14 +773,39 @@
     </section>
   </main>
 
+
+  <div id="nameModal" class="modal-backdrop" hidden>
+    <div class="name-modal" role="dialog" aria-modal="true" aria-labelledby="nameModalTitle">
+      <h2 id="nameModalTitle">名前を入力</h2>
+      <p>ランキングに使う名前を入力してください。<br />最大20文字です。</p>
+      <input id="playerNameInput" class="name-input" type="text" maxlength="20" autocomplete="nickname" placeholder="名前" />
+      <div id="nameError" class="name-error"></div>
+      <div class="button-stack">
+        <button id="nameOkBtn" class="btn primary" type="button">この名前で始める</button>
+        <button id="nameCancelBtn" class="btn secondary" type="button">戻る</button>
+      </div>
+    </div>
+  </div>
+
+
   <div id="toast" class="toast">クリップボードにコピーしました</div>
 
   <script>
     const GAME_TITLE = 'あなたの1秒って';
     const GAME_DESCRIPTION = '最初の3秒だけ時計を見て、あとは体感で秒数を当てるゲームです。';
     const GAME_URL_PLACEHOLDER = '{ゲームURL未定}';
+
+    const SUPABASE_URL = 'https://mlpnjgezrnhdxsxolyzj.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'ここにPublishable keyを入れる';
+    const GAME_SLUG = 'anatano_1byou';
+    const CLIENT_VERSION = 'anatano_1byou_v1.9_ranking';
+    const SCORE_SCALE = 100;
+    const RANKING_LIMIT = 5;
+
     const BEST_KEY = 'anatano_1byo_best_score_v1';
     const LAST_KEY = 'anatano_1byo_last_result_v1';
+    const PLAYER_NAME_KEY = 'chameleonjp_player_name_v1';
+
     const MAX_SECONDS = 40;
     const VISIBLE_CLOCK_SECONDS = 3;
     const TARGET_COUNT = 3;
@@ -643,6 +821,8 @@
 
     const elements = {
       bestDisplay: document.getElementById('bestDisplay'),
+      playerNameDisplay: document.getElementById('playerNameDisplay'),
+      gameStats: document.getElementById('gameStats'),
       lastDisplay: document.getElementById('lastDisplay'),
       startBtn: document.getElementById('startBtn'),
       shareGameBtn: document.getElementById('shareGameBtn'),
@@ -662,9 +842,18 @@
       finalScore: document.getElementById('finalScore'),
       senseScore: document.getElementById('senseScore'),
       bestUpdate: document.getElementById('bestUpdate'),
+      rankingStatus: document.getElementById('rankingStatus'),
+      rankingArea: document.getElementById('rankingArea'),
+      bestRankingList: document.getElementById('bestRankingList'),
+      firstRankingList: document.getElementById('firstRankingList'),
       shareResultBtn: document.getElementById('shareResultBtn'),
       retryBtn: document.getElementById('retryBtn'),
       finishBtn: document.getElementById('finishBtn'),
+      nameModal: document.getElementById('nameModal'),
+      playerNameInput: document.getElementById('playerNameInput'),
+      nameError: document.getElementById('nameError'),
+      nameOkBtn: document.getElementById('nameOkBtn'),
+      nameCancelBtn: document.getElementById('nameCancelBtn'),
       toast: document.getElementById('toast')
     };
 
@@ -674,6 +863,8 @@
     let endMessageTimerId = null;
     let toastTimerId = null;
     let latestShareText = '';
+    let resultToken = 0;
+    let pendingStartAfterName = false;
 
     function createEmptyGame() {
       return {
@@ -685,7 +876,8 @@
         resultType: '',
         finalScore: null,
         senseResult: null,
-        bestUpdated: false
+        bestUpdated: false,
+        playerName: ''
       };
     }
 
@@ -711,6 +903,22 @@
       return (performance.now() - game.startedAt) / 1000;
     }
 
+    function safeGetItem(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function safeSetItem(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (error) {
+        // localStorageが使えない環境でも、ゲーム本体は止めない。
+      }
+    }
+
     function clearAllTimers() {
       if (tickTimerId !== null) {
         clearInterval(tickTimerId);
@@ -727,11 +935,29 @@
     }
 
     function getSavedBestScore() {
-      const raw = localStorage.getItem(BEST_KEY);
+      const raw = safeGetItem(BEST_KEY);
       if (raw === null) return null;
 
       const value = Number(raw);
       return Number.isFinite(value) ? value : null;
+    }
+
+    function getPlayerName() {
+      const raw = safeGetItem(PLAYER_NAME_KEY);
+      return raw ? raw.trim().slice(0, 20) : '';
+    }
+
+    function savePlayerName(name) {
+      safeSetItem(PLAYER_NAME_KEY, name.trim().slice(0, 20));
+    }
+
+    function hasSupabaseConfig() {
+      return Boolean(
+        SUPABASE_URL &&
+        SUPABASE_PUBLISHABLE_KEY &&
+        !SUPABASE_PUBLISHABLE_KEY.includes('ここに') &&
+        !SUPABASE_PUBLISHABLE_KEY.includes('Publishable key')
+      );
     }
 
     function generateTargets() {
@@ -766,7 +992,16 @@
         elements.bestDisplay.textContent = 'ベストスコア（合計誤差）：まだありません';
       }
 
-      const last = localStorage.getItem(LAST_KEY);
+      const playerName = getPlayerName();
+      if (playerName) {
+        elements.playerNameDisplay.hidden = false;
+        elements.playerNameDisplay.textContent = 'ランキング名：' + playerName;
+      } else {
+        elements.playerNameDisplay.hidden = true;
+        elements.playerNameDisplay.textContent = '';
+      }
+
+      const last = safeGetItem(LAST_KEY);
       if (last && savedBest === null) {
         elements.lastDisplay.hidden = false;
         elements.lastDisplay.textContent = '前回：' + last;
@@ -774,6 +1009,8 @@
         elements.lastDisplay.hidden = true;
         elements.lastDisplay.textContent = '';
       }
+
+      refreshGameStats();
     }
 
     function renderTargets() {
@@ -792,10 +1029,68 @@
       });
     }
 
-    function startGame() {
+    function requestStartGame() {
+      const playerName = getPlayerName();
+      if (playerName) {
+        startGame(playerName);
+        return;
+      }
+
+      pendingStartAfterName = true;
+      showNameModal();
+    }
+
+    function showNameModal() {
+      elements.nameError.textContent = '';
+      elements.playerNameInput.value = getPlayerName();
+      elements.nameModal.hidden = false;
+      setTimeout(() => {
+        if (!elements.nameModal.hidden) {
+          elements.playerNameInput.focus();
+        }
+      }, 50);
+    }
+
+    function hideNameModal() {
+      elements.nameModal.hidden = true;
+      elements.playerNameInput.blur();
+      elements.nameError.textContent = '';
+      pendingStartAfterName = false;
+    }
+
+    function confirmPlayerName() {
+      const name = elements.playerNameInput.value.trim();
+      if (!name) {
+        elements.nameError.textContent = '名前を入力してください';
+        return;
+      }
+
+      if (name.length > 20) {
+        elements.nameError.textContent = '名前は20文字以内にしてください';
+        return;
+      }
+
+      savePlayerName(name);
+      elements.playerNameInput.blur();
+      elements.nameModal.hidden = true;
+      elements.nameError.textContent = '';
+
+      if (pendingStartAfterName) {
+        pendingStartAfterName = false;
+        setTimeout(() => startGame(name), 250);
+      } else {
+        renderHome();
+      }
+    }
+
+    function startGame(playerName) {
+      resultToken += 1;
+      pendingStartAfterName = false;
       clearAllTimers();
+      resetRankingDisplay();
       game = createEmptyGame();
       game.phase = 'countdown';
+      game.playerName = playerName || getPlayerName();
       game.targets = generateTargets();
 
       renderTargets();
@@ -945,6 +1240,8 @@
     function showResult() {
       clearAllTimers();
       game.phase = 'result';
+      resultToken += 1;
+      const currentToken = resultToken;
 
       const rows = calculateRows();
       const completed = game.resultType === 'clear';
@@ -959,24 +1256,26 @@
       if (completed && Number.isFinite(totalDiff)) {
         const savedBest = getSavedBestScore();
         if (savedBest === null || totalDiff < savedBest) {
-          localStorage.setItem(BEST_KEY, String(totalDiff));
+          safeSetItem(BEST_KEY, String(totalDiff));
           game.bestUpdated = true;
         }
-        localStorage.setItem(LAST_KEY, 'クリア');
+        safeSetItem(LAST_KEY, 'クリア');
       } else if (game.resultType === 'timeout') {
-        localStorage.setItem(LAST_KEY, '時間切れ');
+        safeSetItem(LAST_KEY, '時間切れ');
       } else if (game.resultType === 'retire') {
-        localStorage.setItem(LAST_KEY, 'リタイア');
+        safeSetItem(LAST_KEY, 'リタイア');
       }
 
       renderResult(rows);
       showScreen('result');
+      syncRankingAfterResult(rows, currentToken);
     }
 
     function renderResult(rows) {
       const resultLabel = getResultLabel(game.resultType);
       elements.resultState.textContent = '結果：' + resultLabel;
       elements.bestUpdate.hidden = !game.bestUpdated;
+      resetRankingDisplay();
 
       if (game.resultType === 'clear') {
         elements.resultSummary.textContent = 'タップ回数：3回 / 3回';
@@ -1056,6 +1355,194 @@
       return [GAME_TITLE, GAME_DESCRIPTION, GAME_URL_PLACEHOLDER].join('\n');
     }
 
+    function scoreSecondsToSubmit(scoreSeconds) {
+      return Math.round(scoreSeconds * SCORE_SCALE);
+    }
+
+    function scoreIntToDisplay(scoreInt) {
+      const value = Number(scoreInt);
+      if (!Number.isFinite(value)) return '---';
+      return formatSeconds(value / SCORE_SCALE);
+    }
+
+    async function callSupabaseRpc(functionName, payload) {
+      if (!hasSupabaseConfig()) {
+        throw new Error('Publishable key is not configured.');
+      }
+
+      const response = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + functionName, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+          Authorization: 'Bearer ' + SUPABASE_PUBLISHABLE_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(functionName + ' failed: ' + response.status + ' ' + text);
+      }
+
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
+    }
+
+    function resetRankingDisplay() {
+      elements.rankingStatus.hidden = true;
+      elements.rankingStatus.textContent = '';
+      elements.rankingArea.hidden = true;
+      elements.bestRankingList.innerHTML = '';
+      elements.firstRankingList.innerHTML = '';
+    }
+
+    function setRankingStatus(message) {
+      elements.rankingStatus.hidden = false;
+      elements.rankingStatus.textContent = message;
+    }
+
+    async function syncRankingAfterResult(rows, token) {
+      if (!hasSupabaseConfig()) {
+        setRankingStatus('ランキング連携：Publishable key設定後に有効になります');
+        return;
+      }
+
+      let submitSucceeded = false;
+      if (game.resultType === 'clear' && Number.isFinite(game.finalScore)) {
+        setRankingStatus('ランキング送信中…');
+        try {
+          await callSupabaseRpc('submit_score', {
+            p_display_name: game.playerName || getPlayerName(),
+            p_game_slug: GAME_SLUG,
+            p_score: scoreSecondsToSubmit(game.finalScore),
+            p_client_version: CLIENT_VERSION
+          });
+          submitSucceeded = true;
+        } catch (error) {
+          console.warn(error);
+          if (token !== resultToken) return;
+          setRankingStatus('ランキング送信に失敗しました。今回の結果は画面に残ります');
+        }
+      } else {
+        setRankingStatus('ランキング取得中…');
+      }
+
+      try {
+        const [bestRanking, firstRanking] = await Promise.all([
+          callSupabaseRpc('get_best_score_ranking', { p_game_slug: GAME_SLUG, p_limit: RANKING_LIMIT }),
+          callSupabaseRpc('get_first_try_ranking', { p_game_slug: GAME_SLUG, p_limit: RANKING_LIMIT })
+        ]);
+
+        if (token !== resultToken) return;
+        renderRankingList(elements.bestRankingList, normalizeRankingRows(bestRanking, 'best'));
+        renderRankingList(elements.firstRankingList, normalizeRankingRows(firstRanking, 'first'));
+        elements.rankingArea.hidden = false;
+
+        if (game.resultType === 'clear') {
+          setRankingStatus(submitSucceeded ? 'ランキング送信：完了しました' : 'ランキングを取得しました');
+        } else {
+          setRankingStatus('ランキングを取得しました');
+        }
+      } catch (error) {
+        console.warn(error);
+        if (token !== resultToken) return;
+        if (game.resultType === 'clear' && !submitSucceeded) return;
+        setRankingStatus('ランキング取得に失敗しました。結果表示はそのまま残ります');
+      }
+    }
+
+    function normalizeRankingRows(data, type) {
+      const list = Array.isArray(data) ? data : (data ? [data] : []);
+      return list.map((row) => {
+        const score = type === 'first'
+          ? pickNumber(row, ['first_score', 'result_first_score', 'score', 'best_score', 'result_best_score'])
+          : pickNumber(row, ['best_score', 'result_best_score', 'score', 'first_score', 'result_first_score']);
+
+        return {
+          name: pickText(row, ['display_name', 'result_display_name', 'player_name', 'name']) || '名無し',
+          score,
+          playCount: pickNumber(row, ['play_count', 'result_play_count'])
+        };
+      }).filter((row) => Number.isFinite(row.score));
+    }
+
+    function pickText(row, keys) {
+      for (const key of keys) {
+        if (row && typeof row[key] === 'string' && row[key].trim()) return row[key].trim();
+      }
+      return '';
+    }
+
+    function pickNumber(row, keys) {
+      for (const key of keys) {
+        const value = row ? Number(row[key]) : NaN;
+        if (Number.isFinite(value)) return value;
+      }
+      return NaN;
+    }
+
+    function renderRankingList(container, rows) {
+      container.innerHTML = '';
+      if (!rows.length) {
+        container.textContent = 'まだ記録がありません';
+        return;
+      }
+
+      let previousScore = null;
+      let previousRank = 0;
+      rows.forEach((row, index) => {
+        const rank = previousScore !== null && row.score === previousScore ? previousRank : index + 1;
+        previousScore = row.score;
+        previousRank = rank;
+
+        const div = document.createElement('div');
+        div.className = 'ranking-row';
+        const playText = Number.isFinite(row.playCount) ? ' / ' + row.playCount + '回' : '';
+        div.innerHTML = `
+          <span class="ranking-rank">${rank}位</span>
+          <span class="ranking-name">${escapeHtml(row.name)}</span>
+          <span class="ranking-score">${scoreIntToDisplay(row.score)}${playText}</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function refreshGameStats() {
+      if (!hasSupabaseConfig()) {
+        elements.gameStats.hidden = true;
+        elements.gameStats.textContent = '';
+        return;
+      }
+
+      try {
+        const data = await callSupabaseRpc('get_game_play_stats', { p_game_slug: GAME_SLUG });
+        const row = Array.isArray(data) ? data[0] : data;
+        const totalPlayCount = pickNumber(row, ['total_play_count', 'play_count']);
+        const playerCount = pickNumber(row, ['player_count', 'players_count']);
+        if (Number.isFinite(totalPlayCount) && Number.isFinite(playerCount)) {
+          elements.gameStats.hidden = false;
+          elements.gameStats.textContent = '参加人数：' + playerCount + '人 / プレイ回数：' + totalPlayCount + '回';
+        } else {
+          elements.gameStats.hidden = true;
+          elements.gameStats.textContent = '';
+        }
+      } catch (error) {
+        console.warn(error);
+        elements.gameStats.hidden = true;
+        elements.gameStats.textContent = '';
+      }
+    }
+
     async function copyText(text) {
       try {
         if (navigator.clipboard && window.isSecureContext) {
@@ -1095,10 +1582,12 @@
     document.addEventListener('selectstart', preventGameTextAction);
     document.addEventListener('dragstart', preventGameTextAction);
 
-    elements.startBtn.addEventListener('click', startGame);
-    elements.retryBtn.addEventListener('click', startGame);
+    elements.startBtn.addEventListener('click', requestStartGame);
+    elements.retryBtn.addEventListener('click', requestStartGame);
     elements.finishBtn.addEventListener('click', () => {
+      resultToken += 1;
       clearAllTimers();
+      resetRankingDisplay();
       game = createEmptyGame();
       renderHome();
       showScreen('home');
@@ -1107,9 +1596,14 @@
     elements.retireBtn.addEventListener('click', handleRetire);
     elements.shareGameBtn.addEventListener('click', () => copyText(buildGameShareText()));
     elements.shareResultBtn.addEventListener('click', () => copyText(latestShareText));
+    elements.nameOkBtn.addEventListener('click', confirmPlayerName);
+    elements.nameCancelBtn.addEventListener('click', hideNameModal);
+    elements.playerNameInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') confirmPlayerName();
+    });
 
     renderHome();
     showScreen('home');
-  </script>
+</script>
 </body>
 </html>
