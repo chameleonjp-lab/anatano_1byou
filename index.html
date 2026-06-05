@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>あなたの1秒って</title>
+  <!-- version: v1.16 layout-fix / ranking / single index.html -->
+  <style>
+    :root {
+      --bg: #f5f2ea;
+      --card: #fffdf7;
+      --text: #2d2a24;
+      --muted: #776f63;
+      --line: #e4dccd;
+      --accent: #2f6f73;
+      --accent-dark: #24575a;
+      --danger: #b84a4a;
+      --danger-dark: #8f3636;
+      --shadow: 0 12px 30px rgba(57, 49, 35, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-user-drag: none;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: radial-gradient(circle at top, #fff9e9 0%, var(--bg) 45%, #e8efe9 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    }
+
+    html {
+      min-height: 100svh;
+      scroll-behavior: auto;
+      overscroll-behavior: none;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100svh;
+      padding: 4px 10px 8px;
+      overflow-x: hidden;
+      touch-action: manipulation;
+      overscroll-behavior: none;
+    }
+
+    button {
+      font: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+      touch-action: manipulation;
+    }
+
+    .app {
+      width: min(100%, 430px);
+      min-height: calc(100svh - 12px);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .card {
+      width: 100%;
+      background: rgba(255, 253, 247, 0.94);
+      border: 1px solid rgba(228, 220, 205, 0.95);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 18px 16px;
+    }
+
+    body[data-screen="home"],
+    body[data-screen="game"] {
+      overflow: hidden;
+    }
+
+    body[data-screen="result"] {
+      overflow-y: auto;
+    }
+
+    .home-card {
+      height: calc(100svh - 12px);
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow: hidden;
+      padding: 15px 14px;
+    }
+
+    .home-card .title {
+      font-size: clamp(1.85rem, 8vw, 2.55rem);
+      margin-bottom: 10px;
+    }
+
+    .home-card .best-box {
+      margin: 9px 0;
+      padding: 10px;
+    }
+
+    .home-card .lead {
+      line-height: 1.55;
+      font-size: clamp(0.92rem, 3.7vw, 1rem);
+      margin: 12px 0;
+    }
+
+    .home-card .notice {
+      line-height: 1.45;
+      font-size: 0.78rem;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .home-card .button-stack {
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .home-card .btn {
+      padding: 13px 16px;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    .title {
+      font-size: clamp(2rem, 9vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: 0.02em;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .lead {
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 1rem;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .notice {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.82rem;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      margin-top: 14px;
+    }
+
+    .best-box,
+    .score-box {
+      border: 1px solid var(--line);
+      background: #fff8e9;
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+      font-weight: 800;
+      margin: 12px 0;
+    }
+
+    .button-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      padding: 15px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(47, 111, 115, 0.18);
+      transition: transform 0.08s ease, opacity 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:active {
+      transform: translateY(2px) scale(0.985);
+      filter: brightness(0.96);
+    }
+
+    .btn.primary {
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .btn.primary:active {
+      background: var(--accent-dark);
+    }
+
+    .btn.secondary {
+      color: var(--accent-dark);
+      background: #e7f1ef;
+      box-shadow: none;
+    }
+
+    .btn.danger {
+      color: #fff;
+      background: var(--danger);
+      box-shadow: none;
+    }
+
+    .btn.danger:active {
+      background: var(--danger-dark);
+    }
+
+    .btn.tap {
+      min-height: 62px;
+      font-size: 1.18rem;
+      border-radius: 18px;
+      box-shadow: 0 10px 18px rgba(47, 111, 115, 0.22);
+      margin-top: 0;
+    }
+
+    .btn.tap:active {
+      transform: translateY(3px) scale(0.975);
+      box-shadow: 0 4px 10px rgba(47, 111, 115, 0.22);
+      filter: brightness(0.95);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: default;
+      transform: none;
+    }
+
+    .game-card {
+      height: calc(100svh - 12px);
+      min-height: 0;
+      max-height: 650px;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .status {
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 0.92rem;
+    }
+
+    .retire-btn {
+      border: 0;
+      color: #fff;
+      background: var(--danger);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 800;
+      min-width: 82px;
+      transition: transform 0.08s ease, filter 0.08s ease;
+    }
+
+    .retire-btn:active {
+      transform: translateY(2px) scale(0.98);
+      filter: brightness(0.94);
+    }
+
+    .target-area {
+      background: #fff8e9;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .targets {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      flex-wrap: nowrap;
+      font-weight: 900;
+      font-size: clamp(1.12rem, 5.5vw, 1.55rem);
+    }
+
+    .target-pill {
+      background: #fffdf7;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      min-width: 0;
+      flex: 1;
+      max-width: 104px;
+    }
+
+    .clock-area {
+      flex: 0 0 clamp(96px, 22svh, 150px);
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4px 0;
+    }
+
+    .clock {
+      font-size: clamp(2.25rem, 13vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.05;
+      white-space: pre-line;
+    }
+
+    .clock.note {
+      font-size: clamp(1.25rem, 7vw, 2rem);
+      color: var(--accent-dark);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .tap-slot {
+      border: 1px solid var(--line);
+      background: #fffdf7;
+      border-radius: 12px;
+      padding: 6px 3px;
+      text-align: center;
+      min-width: 0;
+    }
+
+    .tap-slot small {
+      display: block;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 0.72rem;
+      margin-bottom: 3px;
+    }
+
+    .tap-slot strong {
+      display: block;
+      font-size: clamp(0.95rem, 4.4vw, 1.25rem);
+      word-break: keep-all;
+    }
+
+    .result-title {
+      font-size: clamp(1.8rem, 8vw, 2.6rem);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .result-state {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .result-row {
+      border: 1px solid var(--line);
+      background: #fffdf7;
+      border-radius: 16px;
+      padding: 12px;
+      line-height: 1.6;
+    }
+
+    .result-row strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .final-score {
+      background: #e7f1ef;
+      border: 1px solid #c6dedb;
+      border-radius: 18px;
+      padding: 14px;
+      text-align: center;
+      font-size: 1.18rem;
+      font-weight: 900;
+      margin: 14px 0;
+    }
+
+    .sense-score {
+      border: 1px solid #eadbb7;
+      background: #fff8e8;
+      border-radius: 18px;
+      padding: 13px;
+      text-align: center;
+      line-height: 1.55;
+      font-weight: 800;
+      margin: 12px 0;
+    }
+
+    .sense-score small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .best-update {
+      color: var(--accent-dark);
+      text-align: center;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(45, 42, 36, 0.94);
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 20;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+
+    .player-box,
+    .stats-box,
+    .ranking-status {
+      border: 1px solid var(--line);
+      background: #fffdf7;
+      border-radius: 14px;
+      padding: 8px 10px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.45;
+      margin: 8px 0;
+    }
+
+    .ranking-area {
+      display: grid;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .ranking-card {
+      border: 1px solid var(--line);
+      background: #fffdf7;
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .ranking-card h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .ranking-list {
+      display: grid;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    .ranking-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px;
+      align-items: center;
+      border-top: 1px solid rgba(228, 220, 205, 0.7);
+      padding-top: 6px;
+      line-height: 1.35;
+    }
+
+    .ranking-row:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .ranking-rank,
+    .ranking-score {
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .ranking-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(45, 42, 36, 0.42);
+    }
+
+    .modal-backdrop[hidden] {
+      display: none;
+    }
+
+    .name-modal {
+      width: min(100%, 390px);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 18px 16px;
+    }
+
+    .name-modal h2 {
+      margin: 0 0 10px;
+      text-align: center;
+      font-size: 1.35rem;
+    }
+
+    .name-modal p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .name-input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px 12px;
+      font: inherit;
+      font-size: 1rem;
+      background: #fffdf7;
+      color: var(--text);
+      -webkit-user-select: text;
+      user-select: text;
+      -webkit-touch-callout: default;
+    }
+
+    .name-error {
+      min-height: 1.4em;
+      color: var(--danger);
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-align: center;
+      margin: 8px 0 0;
+    }
+
+
+    @supports not (height: 100svh) {
+      html,
+      body {
+        min-height: 100vh;
+      }
+
+      .app {
+        min-height: calc(100vh - 18px);
+      }
+
+      .game-card,
+      .home-card {
+        height: calc(100vh - 18px);
+      }
+    }
+
+    @media (max-height: 700px) {
+      .home-card {
+        justify-content: flex-start;
+        padding: 12px;
+      }
+
+      .home-card .title {
+        font-size: clamp(1.65rem, 7.2vw, 2.2rem);
+        margin-bottom: 8px;
+      }
+
+      .home-card .best-box {
+        padding: 8px;
+        margin: 8px 0;
+      }
+
+      .home-card .lead {
+        line-height: 1.46;
+        font-size: 0.9rem;
+        margin: 9px 0;
+      }
+
+      .home-card .notice {
+        line-height: 1.38;
+        font-size: 0.72rem;
+        padding-top: 8px;
+        margin-top: 8px;
+      }
+
+      .home-card .button-stack {
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .home-card .btn {
+        padding: 11px 14px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      body {
+        padding: 6px 8px 8px;
+      }
+
+      .card {
+        border-radius: 18px;
+        padding: 14px 12px;
+      }
+
+      .game-card,
+      .home-card {
+        height: calc(100svh - 10px);
+      }
+
+      .game-card {
+        padding: 8px;
+      }
+
+      .results-grid {
+        gap: 6px;
+      }
+
+      .target-pill {
+        padding: 5px 10px;
+      }
+    }
+  
+    .lab-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--accent-dark);
+    }
+
+
+    .result-card {
+      margin-top: 0;
+      padding-top: 14px;
+    }
+
+    .result-card .result-title {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    .result-card .result-state {
+      margin-bottom: 10px;
+    }
+
+</style>
+</head>
+<body data-screen="home">
+  <main class="app" aria-live="polite">
+    <section id="homeScreen" class="screen active">
+      <div class="card home-card">
+        <h1 class="title">あなたの<br />1秒って</h1>
+        <div id="bestDisplay" class="best-box">ベストスコア（合計誤差）：まだありません</div>
+        <div id="playerNameDisplay" class="player-box" hidden></div>
+        <div id="gameStats" class="stats-box" hidden></div>
+        <p class="lead">
+          最初の3秒だけ時計が見えます。<br />
+          そのあとは自分の感覚だけで、<br />
+          お題の秒数に合わせて<br />
+          ボタンを押してください。<br />
+          ズレが小さいほど高記録です。
+        </p>
+        <p id="lastDisplay" class="notice" hidden></p>
+        <p class="notice">
+          ベストスコア（合計誤差）は、このブラウザ内に保存されます。<br />
+          保存データを消すと記録が消える場合があります。<br />
+          別の端末では表示されません。
+        </p>
+        <div class="button-stack">
+          <button id="startBtn" class="btn primary" type="button">ゲームスタート</button>
+          <button id="shareGameBtn" class="btn secondary" type="button">ゲームをシェア</button>
+          <a class="btn secondary lab-button" href="https://chameleonjp.codeberg.page/chameleonjp_lab/" target="_self" rel="noopener">他のゲームで遊ぶ</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen">
+      <div class="card game-card">
+        <div class="top-bar">
+          <div id="statusText" class="status">準備中</div>
+          <button id="retireBtn" class="retire-btn" type="button">リタイア</button>
+        </div>
+
+        <div class="target-area">
+          <div class="label">お題</div>
+          <div id="targetList" class="targets"></div>
+        </div>
+
+        <div class="clock-area">
+          <div id="clockDisplay" class="clock">3</div>
+        </div>
+
+        <div class="results-grid" aria-label="タップ結果">
+          <div class="tap-slot"><small>1回目</small><strong id="tapResult0">--.--秒</strong></div>
+          <div class="tap-slot"><small>2回目</small><strong id="tapResult1">--.--秒</strong></div>
+          <div class="tap-slot"><small>3回目</small><strong id="tapResult2">--.--秒</strong></div>
+        </div>
+
+        <button id="tapBtn" class="btn primary tap" type="button" disabled>ここで押す</button>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+      <div class="card result-card">
+        <h2 class="result-title">あなたの1秒って</h2>
+        <div id="resultState" class="result-state">結果：クリア</div>
+        <div id="resultSummary" class="score-box"></div>
+        <div id="resultList" class="result-list"></div>
+        <div id="finalScore" class="final-score"></div>
+        <div id="senseScore" class="sense-score" hidden></div>
+        <div id="bestUpdate" class="best-update" hidden>ベスト更新！</div>
+        <div id="rankingStatus" class="ranking-status" hidden></div>
+        <div id="rankingArea" class="ranking-area" hidden>
+          <div class="ranking-card">
+            <h3>ベストランキング</h3>
+            <div id="bestRankingList" class="ranking-list"></div>
+          </div>
+          <div class="ranking-card">
+            <h3>初回ランキング</h3>
+            <div id="firstRankingList" class="ranking-list"></div>
+          </div>
+        </div>
+        <div class="button-stack">
+          <button id="shareResultBtn" class="btn secondary" type="button">ゲーム結果をシェア</button>
+          <button id="retryBtn" class="btn primary" type="button">もう一度プレイ</button>
+          <button id="finishBtn" class="btn secondary" type="button">ゲーム終了</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <div id="nameModal" class="modal-backdrop" hidden>
+    <div class="name-modal" role="dialog" aria-modal="true" aria-labelledby="nameModalTitle">
+      <h2 id="nameModalTitle">名前を入力</h2>
+      <p>ランキングに使う名前を入力してください。<br />最大20文字です。</p>
+      <input id="playerNameInput" class="name-input" type="text" maxlength="20" autocomplete="nickname" placeholder="名前" />
+      <div id="nameError" class="name-error"></div>
+      <div class="button-stack">
+        <button id="nameOkBtn" class="btn primary" type="button">この名前で始める</button>
+        <button id="nameCancelBtn" class="btn secondary" type="button">戻る</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="toast" class="toast">クリップボードにコピーしました</div>
+
+  <script>
+    const GAME_TITLE = 'あなたの1秒って';
+    const GAME_DESCRIPTION = '最初の3秒だけ時計を見て、あとは体感で秒数を当てるゲームです。';
+    const GAME_URL_PLACEHOLDER = '{ゲームURL未定}';
+
+    const SUPABASE_URL = 'https://mlpnjgezrnhdxsxolyzj.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'ここにPublishable keyを入れる';
+    const GAME_SLUG = 'anatano_1byou';
+    const CLIENT_VERSION = 'anatano_1byou_v1.16_layout_fix';
+    const SCORE_SCALE = 100;
+    const RANKING_LIMIT = 5;
+
+    const BEST_KEY = 'anatano_1byo_best_score_v1';
+    const LAST_KEY = 'anatano_1byo_last_result_v1';
+    const PLAYER_NAME_KEY = 'chameleonjp_player_name_v1';
+
+    const MAX_SECONDS = 40;
+    const VISIBLE_CLOCK_SECONDS = 3;
+    const TARGET_COUNT = 3;
+    const TARGET_MIN = 6;
+    const TARGET_MAX = 30;
+    const MIN_TARGET_GAP = 4;
+
+    const screens = {
+      home: document.getElementById('homeScreen'),
+      game: document.getElementById('gameScreen'),
+      result: document.getElementById('resultScreen')
+    };
+
+    const elements = {
+      bestDisplay: document.getElementById('bestDisplay'),
+      playerNameDisplay: document.getElementById('playerNameDisplay'),
+      gameStats: document.getElementById('gameStats'),
+      lastDisplay: document.getElementById('lastDisplay'),
+      startBtn: document.getElementById('startBtn'),
+      shareGameBtn: document.getElementById('shareGameBtn'),
+      statusText: document.getElementById('statusText'),
+      retireBtn: document.getElementById('retireBtn'),
+      targetList: document.getElementById('targetList'),
+      clockDisplay: document.getElementById('clockDisplay'),
+      tapBtn: document.getElementById('tapBtn'),
+      tapResults: [
+        document.getElementById('tapResult0'),
+        document.getElementById('tapResult1'),
+        document.getElementById('tapResult2')
+      ],
+      resultState: document.getElementById('resultState'),
+      resultSummary: document.getElementById('resultSummary'),
+      resultList: document.getElementById('resultList'),
+      finalScore: document.getElementById('finalScore'),
+      senseScore: document.getElementById('senseScore'),
+      bestUpdate: document.getElementById('bestUpdate'),
+      rankingStatus: document.getElementById('rankingStatus'),
+      rankingArea: document.getElementById('rankingArea'),
+      bestRankingList: document.getElementById('bestRankingList'),
+      firstRankingList: document.getElementById('firstRankingList'),
+      shareResultBtn: document.getElementById('shareResultBtn'),
+      retryBtn: document.getElementById('retryBtn'),
+      finishBtn: document.getElementById('finishBtn'),
+      nameModal: document.getElementById('nameModal'),
+      playerNameInput: document.getElementById('playerNameInput'),
+      nameError: document.getElementById('nameError'),
+      nameOkBtn: document.getElementById('nameOkBtn'),
+      nameCancelBtn: document.getElementById('nameCancelBtn'),
+      toast: document.getElementById('toast')
+    };
+
+    let game = createEmptyGame();
+    let tickTimerId = null;
+    let countdownTimerId = null;
+    let endMessageTimerId = null;
+    let toastTimerId = null;
+    let latestShareText = '';
+    let resultToken = 0;
+    let pendingStartAfterName = false;
+
+    function createEmptyGame() {
+      return {
+        phase: 'home',
+        targets: [],
+        taps: [],
+        startedAt: 0,
+        endedAt: 0,
+        resultType: '',
+        finalScore: null,
+        senseResult: null,
+        bestUpdated: false,
+        playerName: ''
+      };
+    }
+
+    function showScreen(name) {
+      Object.values(screens).forEach((screen) => screen.classList.remove('active'));
+      screens[name].classList.add('active');
+      document.body.dataset.screen = name;
+      window.scrollTo(0, 0);
+    }
+
+    function roundToTwo(value) {
+      if (!Number.isFinite(value)) return null;
+      return Math.round((value + Number.EPSILON) * 100) / 100;
+    }
+
+    function formatSeconds(value) {
+      const safeValue = Number.isFinite(value) ? Math.max(0, value) : 0;
+      return safeValue.toFixed(2) + '秒';
+    }
+
+    function getElapsedSeconds() {
+      if (!game.startedAt) return 0;
+      return (performance.now() - game.startedAt) / 1000;
+    }
+
+    function safeGetItem(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function safeSetItem(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (error) {
+        // localStorageが使えない環境でも、ゲーム本体は止めない。
+      }
+    }
+
+    function clearAllTimers() {
+      if (tickTimerId !== null) {
+        clearInterval(tickTimerId);
+        tickTimerId = null;
+      }
+      if (countdownTimerId !== null) {
+        clearTimeout(countdownTimerId);
+        countdownTimerId = null;
+      }
+      if (endMessageTimerId !== null) {
+        clearTimeout(endMessageTimerId);
+        endMessageTimerId = null;
+      }
+    }
+
+    function getSavedBestScore() {
+      const raw = safeGetItem(BEST_KEY);
+      if (raw === null) return null;
+
+      const value = Number(raw);
+      return Number.isFinite(value) ? value : null;
+    }
+
+    function getPlayerName() {
+      const raw = safeGetItem(PLAYER_NAME_KEY);
+      return raw ? raw.trim().slice(0, 20) : '';
+    }
+
+    function savePlayerName(name) {
+      safeSetItem(PLAYER_NAME_KEY, name.trim().slice(0, 20));
+    }
+
+    function getSupabasePublishableKey() {
+      return String(SUPABASE_PUBLISHABLE_KEY || '').trim();
+    }
+
+    function hasSupabaseConfig() {
+      const key = getSupabasePublishableKey();
+      return Boolean(
+        SUPABASE_URL &&
+        key &&
+        !key.includes('ここに') &&
+        !key.includes('Publishable key') &&
+        !key.includes('YOUR_') &&
+        !key.includes('REPLACE_')
+      );
+    }
+
+    function generateTargets() {
+      const values = [];
+      for (let n = TARGET_MIN; n <= TARGET_MAX; n += 1) {
+        values.push(n);
+      }
+
+      for (let attempt = 0; attempt < 1000; attempt += 1) {
+        const shuffled = [...values].sort(() => Math.random() - 0.5);
+        const selected = [];
+
+        for (const value of shuffled) {
+          const hasEnoughGap = selected.every((item) => Math.abs(item - value) >= MIN_TARGET_GAP);
+          if (hasEnoughGap) selected.push(value);
+          if (selected.length === TARGET_COUNT) break;
+        }
+
+        if (selected.length === TARGET_COUNT) {
+          return selected.sort((a, b) => a - b);
+        }
+      }
+
+      return [6, 15, 24];
+    }
+
+    function renderHome() {
+      const savedBest = getSavedBestScore();
+      if (savedBest !== null) {
+        elements.bestDisplay.textContent = 'ベストスコア（合計誤差）：' + formatSeconds(savedBest);
+      } else {
+        elements.bestDisplay.textContent = 'ベストスコア（合計誤差）：まだありません';
+      }
+
+      const playerName = getPlayerName();
+      if (playerName) {
+        elements.playerNameDisplay.hidden = false;
+        elements.playerNameDisplay.textContent = 'ランキング名：' + playerName;
+      } else {
+        elements.playerNameDisplay.hidden = true;
+        elements.playerNameDisplay.textContent = '';
+      }
+
+      const last = safeGetItem(LAST_KEY);
+      if (last && savedBest === null) {
+        elements.lastDisplay.hidden = false;
+        elements.lastDisplay.textContent = '前回：' + last;
+      } else {
+        elements.lastDisplay.hidden = true;
+        elements.lastDisplay.textContent = '';
+      }
+
+      refreshGameStats();
+    }
+
+    function renderTargets() {
+      elements.targetList.innerHTML = '';
+      game.targets.forEach((target) => {
+        const span = document.createElement('span');
+        span.className = 'target-pill';
+        span.textContent = target + '秒';
+        elements.targetList.appendChild(span);
+      });
+    }
+
+    function resetTapSlots() {
+      elements.tapResults.forEach((slot) => {
+        slot.textContent = '--.--秒';
+      });
+    }
+
+    function requestStartGame() {
+      const playerName = getPlayerName();
+      if (playerName) {
+        startGame(playerName);
+        return;
+      }
+
+      pendingStartAfterName = true;
+      showNameModal();
+    }
+
+    function showNameModal() {
+      elements.nameError.textContent = '';
+      elements.playerNameInput.value = getPlayerName();
+      elements.nameModal.hidden = false;
+      setTimeout(() => elements.playerNameInput.focus(), 50);
+    }
+
+    function hideNameModal() {
+      elements.nameModal.hidden = true;
+      elements.playerNameInput.blur();
+      elements.nameError.textContent = '';
+      pendingStartAfterName = false;
+    }
+
+    function confirmPlayerName() {
+      const name = elements.playerNameInput.value.trim();
+      if (!name) {
+        elements.nameError.textContent = '名前を入力してください';
+        return;
+      }
+
+      if (name.length > 20) {
+        elements.nameError.textContent = '名前は20文字以内にしてください';
+        return;
+      }
+
+      savePlayerName(name);
+      elements.playerNameInput.blur();
+      elements.nameModal.hidden = true;
+      elements.nameError.textContent = '';
+
+      if (pendingStartAfterName) {
+        pendingStartAfterName = false;
+        setTimeout(() => startGame(name), 250);
+      } else {
+        renderHome();
+      }
+    }
+
+    function startGame(playerName) {
+      clearAllTimers();
+      game = createEmptyGame();
+      game.phase = 'countdown';
+      game.playerName = playerName || getPlayerName();
+      game.targets = generateTargets();
+
+      renderTargets();
+      resetTapSlots();
+      elements.statusText.textContent = '準備中';
+      elements.clockDisplay.className = 'clock';
+      elements.clockDisplay.textContent = '3';
+      elements.tapBtn.disabled = true;
+      showScreen('game');
+
+      runCountdown(3);
+    }
+
+    function runCountdown(number) {
+      if (game.phase !== 'countdown') return;
+
+      if (number > 0) {
+        elements.clockDisplay.className = 'clock';
+        elements.clockDisplay.textContent = String(number);
+        elements.statusText.textContent = '準備中';
+        countdownTimerId = setTimeout(() => runCountdown(number - 1), 1000);
+        return;
+      }
+
+      elements.clockDisplay.className = 'clock note';
+      elements.clockDisplay.textContent = 'スタート';
+      countdownTimerId = setTimeout(beginMeasurement, 650);
+    }
+
+    function beginMeasurement() {
+      if (game.phase !== 'countdown') return;
+
+      game.phase = 'playing';
+      game.startedAt = performance.now();
+      elements.statusText.textContent = '計測中';
+      elements.tapBtn.disabled = false;
+      updateClock();
+      tickTimerId = setInterval(updateClock, 30);
+    }
+
+    function updateClock() {
+      if (game.phase !== 'playing') return;
+
+      const elapsed = getElapsedSeconds();
+
+      if (elapsed >= MAX_SECONDS) {
+        finishGame('timeout');
+        return;
+      }
+
+      if (elapsed <= VISIBLE_CLOCK_SECONDS) {
+        elements.clockDisplay.className = 'clock';
+        elements.clockDisplay.textContent = formatSeconds(elapsed);
+      } else {
+        elements.clockDisplay.className = 'clock note';
+        elements.clockDisplay.textContent = '感覚で\n押してください';
+      }
+
+      elements.statusText.textContent = '計測中 ' + game.taps.length + ' / ' + TARGET_COUNT;
+    }
+
+    function handleTap() {
+      if (game.phase !== 'playing') return;
+
+      const elapsed = getElapsedSeconds();
+      if (elapsed >= MAX_SECONDS) {
+        finishGame('timeout');
+        return;
+      }
+
+      if (game.taps.length >= TARGET_COUNT) return;
+
+      game.taps.push(elapsed);
+      const index = game.taps.length - 1;
+      elements.tapResults[index].textContent = formatSeconds(elapsed);
+      elements.statusText.textContent = '計測中 ' + game.taps.length + ' / ' + TARGET_COUNT;
+
+      if (game.taps.length >= TARGET_COUNT) {
+        finishGame('clear');
+      }
+    }
+
+    function handleRetire() {
+      if (game.phase === 'home' || game.phase === 'result' || game.phase === 'ending') return;
+      finishGame('retire');
+    }
+
+    function finishGame(type) {
+      if (game.phase === 'result' || game.phase === 'ending') return;
+
+      const wasCountdown = game.phase === 'countdown';
+      clearAllTimers();
+      elements.tapBtn.disabled = true;
+      game.resultType = type;
+      game.endedAt = wasCountdown ? 0 : getElapsedSeconds();
+
+      if (type === 'clear') {
+        game.phase = 'ending';
+        elements.statusText.textContent = '終了';
+        elements.clockDisplay.className = 'clock note';
+        elements.clockDisplay.textContent = '計測終了！\n結果を確認します';
+        endMessageTimerId = setTimeout(() => showResult(), 1000);
+        return;
+      }
+
+      showResult();
+    }
+
+    function calculateRows() {
+      return game.targets.map((target, index) => {
+        const rawTap = game.taps[index];
+        const tap = Number.isFinite(rawTap) ? roundToTwo(rawTap) : null;
+        const diff = Number.isFinite(tap) ? roundToTwo(Math.abs(tap - target)) : null;
+        return { target, tap, diff };
+      });
+    }
+
+    function calculateSenseResult(rows) {
+      if (game.resultType !== 'clear') return null;
+
+      const targetTotal = rows.reduce((sum, row) => sum + row.target, 0);
+      const tapTotal = rows.reduce((sum, row) => sum + row.tap, 0);
+
+      if (!Number.isFinite(targetTotal) || !Number.isFinite(tapTotal) || targetTotal <= 0) {
+        return null;
+      }
+
+      const oneSecondSense = tapTotal / targetTotal;
+      const driftPerSecond = oneSecondSense - 1;
+      const averageDiff = roundToTwo(game.finalScore / TARGET_COUNT);
+      const label = getSenseLabel(driftPerSecond);
+
+      return {
+        oneSecondSense,
+        driftPerSecond,
+        averageDiff,
+        label
+      };
+    }
+
+    function getSenseLabel(driftPerSecond) {
+      const abs = Math.abs(driftPerSecond);
+      if (abs < 0.005) return 'ほぼぴったり';
+      return driftPerSecond > 0 ? '実際より少しゆっくりめ' : '実際より少し早め';
+    }
+
+    function showResult() {
+      clearAllTimers();
+      game.phase = 'result';
+      resultToken += 1;
+      const currentToken = resultToken;
+
+      const rows = calculateRows();
+      const completed = game.resultType === 'clear';
+      const totalDiff = completed
+        ? roundToTwo(rows.reduce((sum, row) => sum + (row.diff || 0), 0))
+        : null;
+
+      game.finalScore = totalDiff;
+      game.senseResult = completed ? calculateSenseResult(rows) : null;
+      game.bestUpdated = false;
+
+      if (completed && Number.isFinite(totalDiff)) {
+        const savedBest = getSavedBestScore();
+        if (savedBest === null || totalDiff < savedBest) {
+          safeSetItem(BEST_KEY, String(totalDiff));
+          game.bestUpdated = true;
+        }
+        safeSetItem(LAST_KEY, 'クリア');
+      } else if (game.resultType === 'timeout') {
+        safeSetItem(LAST_KEY, '時間切れ');
+      } else if (game.resultType === 'retire') {
+        safeSetItem(LAST_KEY, 'リタイア');
+      }
+
+      renderResult(rows);
+      showScreen('result');
+      syncRankingAfterResult(rows, currentToken);
+    }
+
+    function renderResult(rows) {
+      const resultLabel = getResultLabel(game.resultType);
+      elements.resultState.textContent = '結果：' + resultLabel;
+      elements.bestUpdate.hidden = !game.bestUpdated;
+      resetRankingDisplay();
+
+      if (game.resultType === 'clear') {
+        elements.resultSummary.textContent = 'タップ回数：3回 / 3回';
+        elements.finalScore.textContent = '最終スコア：' + formatSeconds(game.finalScore);
+      } else if (game.resultType === 'timeout') {
+        elements.resultSummary.textContent = '経過秒数：' + formatSeconds(MAX_SECONDS) + ' / タップ回数：' + game.taps.length + '回 / 3回';
+        elements.finalScore.textContent = '最終スコア：時間切れ';
+      } else {
+        elements.resultSummary.textContent = '経過秒数：' + formatSeconds(game.endedAt) + ' / タップ回数：' + game.taps.length + '回 / 3回';
+        elements.finalScore.textContent = '最終スコア：リタイア';
+      }
+
+      renderSenseScore();
+
+      elements.resultList.innerHTML = '';
+      rows.forEach((row, index) => {
+        const div = document.createElement('div');
+        div.className = 'result-row';
+        div.innerHTML = `
+          <strong>お題${index + 1}：${row.target}秒</strong>
+          タップ：${Number.isFinite(row.tap) ? formatSeconds(row.tap) : '未タップ'}<br />
+          差分：${Number.isFinite(row.diff) ? formatSeconds(row.diff) : 'なし'}
+        `;
+        elements.resultList.appendChild(div);
+      });
+
+      latestShareText = buildResultShareText(rows);
+    }
+
+    function renderSenseScore() {
+      if (!game.senseResult) {
+        elements.senseScore.hidden = true;
+        elements.senseScore.innerHTML = '';
+        return;
+      }
+
+      const sense = game.senseResult;
+      const driftPrefix = sense.driftPerSecond >= 0 ? '+' : '';
+      elements.senseScore.hidden = false;
+      elements.senseScore.innerHTML = `
+        あなたの1秒感覚：${sense.oneSecondSense.toFixed(2)}秒<br />
+        1秒あたりのズレ：${driftPrefix}${sense.driftPerSecond.toFixed(3)}秒
+        <small>平均ズレ：${formatSeconds(sense.averageDiff)} / ${sense.label}</small>
+      `;
+    }
+
+    function getResultLabel(type) {
+      if (type === 'clear') return 'クリア';
+      if (type === 'timeout') return '時間切れ';
+      return 'リタイア';
+    }
+
+    function buildResultShareText(rows) {
+      const label = getResultLabel(game.resultType);
+      if (game.resultType === 'clear') {
+        return [
+          GAME_TITLE + ' 結果',
+          '結果：クリア',
+          'お題：' + game.targets.map((target) => target + '秒').join(' / '),
+          'タップ：' + game.taps.map((tap) => formatSeconds(tap)).join(' / '),
+          '最終スコア：' + formatSeconds(game.finalScore),
+          game.senseResult
+            ? 'あなたの1秒感覚：' + game.senseResult.oneSecondSense.toFixed(2) + '秒（' + game.senseResult.label + '）'
+            : ''
+        ].filter(Boolean).join('\n');
+      }
+
+      return [
+        GAME_TITLE + ' 結果',
+        '結果：' + label,
+        '経過秒数：' + formatSeconds(game.resultType === 'timeout' ? MAX_SECONDS : game.endedAt),
+        'タップ回数：' + game.taps.length + '回 / 3回'
+      ].join('\n');
+    }
+
+    function getGameShareUrl() {
+      if (location.protocol === 'http:' || location.protocol === 'https:') {
+        return location.href.split('#')[0];
+      }
+      return GAME_URL_PLACEHOLDER;
+    }
+
+    function buildGameShareText() {
+      return [GAME_TITLE, GAME_DESCRIPTION, getGameShareUrl()].join('\n');
+    }
+
+    function scoreSecondsToSubmit(scoreSeconds) {
+      return Math.round(scoreSeconds * SCORE_SCALE);
+    }
+
+    function scoreIntToDisplay(scoreInt) {
+      const value = Number(scoreInt);
+      if (!Number.isFinite(value)) return '---';
+      return formatSeconds(value / SCORE_SCALE);
+    }
+
+    async function callSupabaseRpc(functionName, payload) {
+      if (!hasSupabaseConfig()) {
+        throw new Error('Publishable key is not configured.');
+      }
+
+      const key = getSupabasePublishableKey();
+      const response = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + functionName, {
+        method: 'POST',
+        headers: {
+          apikey: key,
+          Authorization: 'Bearer ' + key,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(functionName + ' failed: ' + response.status + ' ' + text);
+      }
+
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
+    }
+
+    function resetRankingDisplay() {
+      elements.rankingStatus.hidden = true;
+      elements.rankingStatus.textContent = '';
+      elements.rankingArea.hidden = true;
+      elements.bestRankingList.innerHTML = '';
+      elements.firstRankingList.innerHTML = '';
+    }
+
+    function setRankingStatus(message) {
+      elements.rankingStatus.hidden = false;
+      elements.rankingStatus.textContent = message;
+    }
+
+    function isSubmitRejected(result) {
+      const row = Array.isArray(result) ? result[0] : result;
+      return Boolean(row && row.accepted === false);
+    }
+
+    async function syncRankingAfterResult(rows, token) {
+      if (!hasSupabaseConfig()) {
+        setRankingStatus('ランキング連携：Publishable key設定後に有効になります');
+        return;
+      }
+
+      let submitSucceeded = false;
+      if (game.resultType === 'clear' && Number.isFinite(game.finalScore)) {
+        setRankingStatus('ランキング送信中…');
+        try {
+          const submitResult = await callSupabaseRpc('submit_score', {
+            p_display_name: game.playerName || getPlayerName(),
+            p_game_slug: GAME_SLUG,
+            p_score: scoreSecondsToSubmit(game.finalScore),
+            p_client_version: CLIENT_VERSION
+          });
+          if (isSubmitRejected(submitResult)) {
+            throw new Error('submit_score rejected this score.');
+          }
+          submitSucceeded = true;
+        } catch (error) {
+          console.warn(error);
+          if (token !== resultToken) return;
+          setRankingStatus('ランキング送信に失敗しました。今回の結果は画面に残ります');
+        }
+      } else {
+        setRankingStatus('ランキング取得中…');
+      }
+
+      try {
+        const [bestRanking, firstRanking] = await Promise.all([
+          callSupabaseRpc('get_best_score_ranking', { p_game_slug: GAME_SLUG, p_limit: RANKING_LIMIT }),
+          callSupabaseRpc('get_first_try_ranking', { p_game_slug: GAME_SLUG, p_limit: RANKING_LIMIT })
+        ]);
+
+        if (token !== resultToken) return;
+        renderRankingList(elements.bestRankingList, normalizeRankingRows(bestRanking, 'best'));
+        renderRankingList(elements.firstRankingList, normalizeRankingRows(firstRanking, 'first'));
+        elements.rankingArea.hidden = false;
+
+        if (game.resultType === 'clear') {
+          setRankingStatus(submitSucceeded ? 'ランキング送信：完了しました' : 'ランキングを取得しました');
+        } else {
+          setRankingStatus('ランキングを取得しました');
+        }
+      } catch (error) {
+        console.warn(error);
+        if (token !== resultToken) return;
+        if (game.resultType === 'clear' && !submitSucceeded) return;
+        setRankingStatus('ランキング取得に失敗しました。結果表示はそのまま残ります');
+      }
+    }
+
+    function normalizeRankingRows(data, type) {
+      const list = Array.isArray(data) ? data : (data ? [data] : []);
+      return list.map((row) => {
+        const score = type === 'first'
+          ? pickNumber(row, ['first_score', 'result_first_score', 'score', 'best_score', 'result_best_score'])
+          : pickNumber(row, ['best_score', 'result_best_score', 'score', 'first_score', 'result_first_score']);
+
+        return {
+          rank: pickNumber(row, ['rank', 'ranking', 'result_rank']),
+          name: pickText(row, ['display_name', 'result_display_name', 'player_name', 'name']) || '名無し',
+          score,
+          playCount: pickNumber(row, ['play_count', 'result_play_count'])
+        };
+      }).filter((row) => Number.isFinite(row.score));
+    }
+
+    function pickText(row, keys) {
+      for (const key of keys) {
+        if (row && typeof row[key] === 'string' && row[key].trim()) return row[key].trim();
+      }
+      return '';
+    }
+
+    function pickNumber(row, keys) {
+      for (const key of keys) {
+        const value = row ? Number(row[key]) : NaN;
+        if (Number.isFinite(value)) return value;
+      }
+      return NaN;
+    }
+
+    function renderRankingList(container, rows) {
+      container.innerHTML = '';
+      if (!rows.length) {
+        container.textContent = 'まだ記録がありません';
+        return;
+      }
+
+      let previousScore = null;
+      let previousRank = 0;
+      rows.forEach((row, index) => {
+        const fallbackRank = previousScore !== null && row.score === previousScore ? previousRank : index + 1;
+        const rank = Number.isFinite(row.rank) ? row.rank : fallbackRank;
+        previousScore = row.score;
+        previousRank = rank;
+
+        const div = document.createElement('div');
+        div.className = 'ranking-row';
+        const playText = Number.isFinite(row.playCount) ? ' / ' + row.playCount + '回' : '';
+        div.innerHTML = `
+          <span class="ranking-rank">${rank}位</span>
+          <span class="ranking-name">${escapeHtml(row.name)}</span>
+          <span class="ranking-score">${scoreIntToDisplay(row.score)}${playText}</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function refreshGameStats() {
+      if (!hasSupabaseConfig()) {
+        elements.gameStats.hidden = true;
+        elements.gameStats.textContent = '';
+        return;
+      }
+
+      try {
+        const data = await callSupabaseRpc('get_game_play_stats', { p_game_slug: GAME_SLUG });
+        const row = Array.isArray(data) ? data[0] : data;
+        const totalPlayCount = pickNumber(row, ['total_play_count', 'play_count']);
+        const playerCount = pickNumber(row, ['player_count', 'players_count']);
+        if (Number.isFinite(totalPlayCount) && Number.isFinite(playerCount)) {
+          elements.gameStats.hidden = false;
+          elements.gameStats.textContent = '参加人数：' + playerCount + '人 / プレイ回数：' + totalPlayCount + '回';
+        }
+      } catch (error) {
+        console.warn(error);
+        elements.gameStats.hidden = true;
+        elements.gameStats.textContent = '';
+      }
+    }
+
+    async function copyText(text) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          document.execCommand('copy');
+          textarea.remove();
+        }
+        showToast('クリップボードにコピーしました');
+      } catch (error) {
+        showToast('コピーできませんでした');
+      }
+    }
+
+    function showToast(message) {
+      elements.toast.textContent = message;
+      elements.toast.classList.add('show');
+      if (toastTimerId !== null) clearTimeout(toastTimerId);
+      toastTimerId = setTimeout(() => {
+        elements.toast.classList.remove('show');
+      }, 1000);
+    }
+
+    function preventGameTextAction(event) {
+      if (event.target.closest('input, textarea')) return;
+      event.preventDefault();
+    }
+
+    document.addEventListener('contextmenu', preventGameTextAction);
+    document.addEventListener('selectstart', preventGameTextAction);
+    document.addEventListener('dragstart', preventGameTextAction);
+
+    elements.startBtn.addEventListener('click', requestStartGame);
+    elements.retryBtn.addEventListener('click', requestStartGame);
+    elements.finishBtn.addEventListener('click', () => {
+      clearAllTimers();
+      game = createEmptyGame();
+      renderHome();
+      showScreen('home');
+    });
+    elements.tapBtn.addEventListener('click', handleTap);
+    elements.retireBtn.addEventListener('click', handleRetire);
+    elements.shareGameBtn.addEventListener('click', () => copyText(buildGameShareText()));
+    elements.shareResultBtn.addEventListener('click', () => copyText(latestShareText));
+    elements.nameOkBtn.addEventListener('click', confirmPlayerName);
+    elements.nameCancelBtn.addEventListener('click', hideNameModal);
+    elements.playerNameInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') confirmPlayerName();
+    });
+
+    renderHome();
+    showScreen('home');
+</script>
+</body>
+</html>
