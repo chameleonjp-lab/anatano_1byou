@@ -839,7 +839,7 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
     const id=String(value||'').replaceAll('_','-').toLowerCase();
     const exact=Object.keys(catalogs).find(lang=>lang.toLowerCase()===id);
     if(exact)return exact;
-    if(id==='zh'||id.startsWith('zh-'))return /hant|tw|hk|mo/.test(id)?'zh-Hant':'zh-Hans';
+    if(id==='zh'||id.startsWith('zh-')){const parts=id.split('-');if(parts.includes('hans'))return 'zh-Hans';if(parts.includes('hant'))return 'zh-Hant';return parts.some(p=>['tw','hk','mo'].includes(p))?'zh-Hant':'zh-Hans';}
     if(id==='pt'||id.startsWith('pt-'))return 'pt-BR';
     const base=id.split('-')[0];return Object.hasOwn(catalogs,base)?base:null;
   }
@@ -1680,19 +1680,9 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
     }
 
     function normalizeRankingRows(data, type) {
-      const list = Array.isArray(data) ? data : (data ? [data] : []);
-      return list.map((row) => {
-        const score = type === 'first'
-          ? pickNumber(row, ['first_score', 'result_first_score', 'score', 'best_score', 'result_best_score'])
-          : pickNumber(row, ['best_score', 'result_best_score', 'score', 'first_score', 'result_first_score']);
-
-        return {
-          rank: pickNumber(row, ['rank_no', 'rank', 'ranking', 'result_rank']),
-          name: pickText(row, ['display_name', 'result_display_name', 'player_name', 'name']) || '',
-          score,
-          playCount: pickNumber(row, ['play_count', 'result_play_count'])
-        };
-      }).filter((row) => Number.isFinite(row.score));
+      const key=type==='first'?'first_score':'best_score';
+      if(!Array.isArray(data)||data.some(row=>!row||!Number.isInteger(row.rank_no)||row.rank_no<1||typeof row.display_name!=='string'||!Number.isInteger(row[key])))throw new Error('Invalid ranking response');
+      return data.slice(0,RANKING_LIMIT).map(row=>({rank:row.rank_no,name:row.display_name,score:row[key],playCount:Number.isInteger(row.play_count)&&row.play_count>=0?row.play_count:NaN}));
     }
 
     function pickText(row, keys) {
@@ -1718,13 +1708,8 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
         return;
       }
 
-      let previousScore = null;
-      let previousRank = 0;
-      rows.slice(0,RANKING_LIMIT).forEach((row, index) => {
-        const fallbackRank = previousScore !== null && row.score === previousScore ? previousRank : index + 1;
-        const rank = Number.isFinite(row.rank) ? row.rank : fallbackRank;
-        previousScore = row.score;
-        previousRank = rank;
+      rows.slice(0,RANKING_LIMIT).forEach((row) => {
+        const rank = row.rank;
 
         const div = document.createElement('div');
         div.className = 'ranking-row';

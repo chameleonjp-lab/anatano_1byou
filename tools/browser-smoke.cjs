@@ -20,6 +20,7 @@ try{
   assert.notEqual(rpc,'submit_score','unsafe legacy submission must never be used');
   if(rpc==='get_game_play_stats'){await route.fulfill({json:[{total_play_count:50,player_count:35}]});return;}
   if(rankMode==='failure'){await route.fulfill({status:503,json:{code:'network_error'}});return;}
+  if(rankMode==='malformed'){await route.fulfill({json:[{display_name:'missing score/rank'}]});return;}
   if(rankMode==='empty'){await route.fulfill({json:[]});return;}
   let name='Player';if(rankMode==='race'){raceCalls++;name=raceCalls<=2?'Stale':'Fresh';await new Promise(r=>setTimeout(r,raceCalls<=2?200:10));}
   await route.fulfill({json:Array.from({length:35},(_,i)=>({rank_no:i<2?1:i+1,display_name:rankMode==='normal'?(i<2?'同名 <img>':`Player ${i}`):name,best_score:123+i,first_score:223+i,play_count:3}))});
@@ -59,6 +60,7 @@ try{
  }
  rankMode='race';await page.evaluate(()=>{void loadRankings();void loadRankings();});await page.waitForTimeout(400);assert.equal(await page.locator('#bestRankingList .ranking-name').first().textContent(),'Fresh');
  rankMode='failure';await page.click('#retryRankingBtn');await page.waitForFunction(()=>!document.getElementById('retryRankingBtn').disabled);assert.equal(await page.locator('#rankingReadStatus').textContent(),catalogs.th.rankingLoadFailed);assert.equal(await page.evaluate(()=>game.finalScore),0.33);
+ rankMode='malformed';await page.click('#retryRankingBtn');await page.waitForFunction(()=>!document.getElementById('retryRankingBtn').disabled);assert.equal(await page.locator('#rankingReadStatus').textContent(),catalogs.th.rankingLoadFailed);
  rankMode='empty';await page.click('#retryRankingBtn');await page.waitForFunction(()=>!document.getElementById('retryRankingBtn').disabled);assert.equal(await page.locator('#bestRankingList').textContent(),catalogs.th.noRecords);
  await page.click('#finishBtn');await page.fill('#playerNameInput','');await page.locator('#playerNameInput').dispatchEvent('change');await page.reload();assert.equal(await page.locator('#playerNameInput').inputValue(),'');assert.equal(await page.evaluate(()=>localStorage.getItem('anatano_1byo_best_score_v1')),'0.33');
  assert.equal(await page.evaluate(()=>window.gameAudio.enabled),false);assert.equal(await page.evaluate(()=>window.gameAudio.volume),0);assert.deepEqual(errors,[]);

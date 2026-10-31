@@ -27,7 +27,7 @@ test('all fifteen catalogs contain the full same placeholders',()=>{
 test('saved language wins and browser aliases fall back explicitly',()=>{
   assert.ok(code,'localization runtime must exist');
   assert.equal(boot('vi',['ja-JP']).api.language,'vi');
-  assert.equal(boot(null,['zh-TW']).api.language,'zh-Hant');
+  assert.equal(boot(null,['zh-TW']).api.language,'zh-Hant');assert.equal(boot(null,['zh-Hans-TW']).api.language,'zh-Hans');assert.equal(boot(null,['zh-Hant-CN']).api.language,'zh-Hant');
   assert.equal(boot(null,['pt-PT']).api.language,'pt-BR');
   assert.equal(boot(null,['xx','de-AT']).api.language,'de');
   assert.equal(boot('invalid',['xx']).api.language,'en');
