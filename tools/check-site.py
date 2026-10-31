@@ -2,6 +2,7 @@
 """Validate the single-file release and optionally stage only its public file."""
 import argparse
 import json
+import re
 from html.parser import HTMLParser
 from pathlib import Path
 import shutil
@@ -53,9 +54,13 @@ def main():
     args = argparse.ArgumentParser()
     args.add_argument('--out', type=Path)
     options = args.parse_args()
+    subprocess.run(['python3', str(ROOT / 'tools/build-locales.py'), '--check'], check=True)
     html = (ROOT / 'index.html').read_text(encoding='utf-8')
     if '<html' not in html.lower() or '</html>' not in html.lower():
         raise ValueError('index.html is not a complete HTML document')
+    queue = re.search(r'<script id="score-queue">\n([\s\S]*?)</script>', html)
+    if not queue or queue[1] != (ROOT / 'tools/score-queue.cjs').read_text():
+        raise ValueError('The shipped score queue differs from its tested source')
     page = Page()
     page.feed(html)
     if page.local_assets:

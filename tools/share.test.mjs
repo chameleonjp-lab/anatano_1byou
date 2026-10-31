@@ -9,10 +9,15 @@ assert.ok(helper,'The actual inline share helper must be present');
 function setup(open=()=>null,writeText=async()=>{}) {
   const nodes=new Map();
   for(const id of ['commonShareFallback','commonShareText','commonShareStatus','commonShareCopy','commonShareClose']) {
-    nodes.set(id,{value:'',textContent:'',open:false,events:{},addEventListener(name,cb){this.events[name]=cb;},showModal(){this.open=true;},close(){this.open=false;},focus(){},select(){this.selected=true;}});
+    nodes.set(id,{dataset:{},value:'',textContent:'',open:false,events:{},addEventListener(name,cb){this.events[name]=cb;},showModal(){this.open=true;},close(){this.open=false;},focus(){},select(){this.selected=true;}});
   }
   const window={open};
-  vm.runInNewContext(helper,{window,document:{getElementById:id=>nodes.get(id)},navigator:{clipboard:{writeText}},URL});
+  const catalog=html.match(/<script id="locale-catalogs" type="application\/json">([\s\S]*?)<\/script>/)[1];
+  nodes.set('locale-catalogs',{textContent:catalog});
+  const context={window,document:{documentElement:{},getElementById:id=>nodes.get(id),querySelectorAll:()=>[]},localStorage:{getItem:()=> 'ja'},navigator:{languages:['ja'],clipboard:{writeText}},URL};
+  vm.createContext(context);
+  vm.runInContext(html.match(/<script id="localization">([\s\S]*?)<\/script>/)[1],context);
+  vm.runInContext(helper,context);
   return {window,nodes};
 }
 test('X receives exact UTF-8 text, URL, symbols and newlines; opener is detached',()=>{
@@ -53,5 +58,5 @@ test('copy success is a copy acknowledgement; closing never modifies result text
 });
 test('home and result each have a verified detail link and exact Japanese X label',()=>{
   assert.equal((html.match(/>Xでシェア<\/button>/g)||[]).length,2);
-  assert.equal((html.match(/class="common-ranking-link" href="https:\/\/chameleonjp-lab.github.io\/chameleonjp_lab\/ranking.html\?game=[^"]+">ランキング<\/a>/g)||[]).length,2);
+  assert.equal((html.match(/class="common-ranking-link"[^>]* href="https:\/\/chameleonjp-lab.github.io\/chameleonjp_lab\/ranking.html\?game=[^"]+">ランキング<\/a>/g)||[]).length,2);
 });

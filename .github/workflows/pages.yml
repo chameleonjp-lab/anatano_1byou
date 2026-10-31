@@ -26,6 +26,14 @@ jobs:
           python-version: '3.12'
       - run: python3 tools/check-site.py
       - run: node tools/share.test.mjs
+      - run: node tools/i18n.test.mjs
+      - run: node tools/score-queue.test.cjs
+      - run: node tools/audio.test.cjs
+      - run: node tools/network.test.mjs
+      - name: Install browser test dependency
+        run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.62.1
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: node tools/browser-smoke.cjs
       - name: Stage the validated public file
         run: python3 tools/check-site.py --out _site
       - name: Upload this commit's Pages artifact
