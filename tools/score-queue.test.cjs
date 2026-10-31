@@ -22,3 +22,7 @@ test('storage/UUID failures do not prevent gameplay and malformed acks remain pe
 test('an acknowledgement for another name remains pending with the original ID',async()=>{
  const q=createScoreQueue({gameSlug:'test',uuid:()=>ID,send:async()=>receipt(10,'Someone else')});q.enqueue(q.capture('Alice','v1'),10);await q.drain();assert.equal(q.list().length,1);assert.equal(q.list()[0].id,ID);assert.equal(q.list()[0].state,'pending');
 });
+
+test('missing or malformed acceptance remains retryable after reload with the same UUID',async()=>{
+ for(const response of [null,undefined,{},[],{accepted:0},{accepted:'true'}]){const store=storage(),calls=[];const q=createScoreQueue({gameSlug:'test',storage:store,uuid:()=>ID,send:async p=>{calls.push(p);return response}});q.enqueue(q.capture('Alice','v1'),10);await q.drain();assert.equal(q.list()[0].state,'pending');const retry=createScoreQueue({gameSlug:'test',storage:store,send:async p=>{calls.push(p);return receipt(10)}});await retry.drain();assert.deepEqual(calls[0],calls[1]);assert.equal(retry.list().length,0)}
+});

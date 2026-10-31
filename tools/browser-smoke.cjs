@@ -14,7 +14,7 @@ try{
   const rpc=route.request().url().split('/').pop();
   if(rpc==='submit_score_once_shared_v1'){
    const payload=route.request().postDataJSON();submissions.push(payload);const duplicate=ledger.has(payload.p_submission_id);ledger.set(payload.p_submission_id,payload);
-   if(mode==='offline'){await route.fulfill({status:503,json:{code:'network_error'}});return;}
+   if(mode==='malformed'){await route.fulfill({json:{}});return;}if(mode==='offline'){await route.fulfill({status:503,json:{code:'network_error'}});return;}
    await route.fulfill({json:[{accepted:true,result_display_name:payload.p_display_name,result_normalized_name:payload.p_display_name,result_first_score:payload.p_score,result_best_score:payload.p_score,result_play_count:1,was_duplicate:duplicate}]});return;
   }
   assert.notEqual(rpc,'submit_score','unsafe legacy submission must never be used');
@@ -51,7 +51,7 @@ try{
  await complete();await page.waitForFunction(()=>game.submissionStatus==='failed');assert.equal(submissions.length,1);assert.equal(submissions[0].p_display_name,'名前 <>& +');assert.equal(submissions[0].p_score,33);
  const payload=submissions[0];assert.equal(await page.locator('#rankingStatus').textContent(),catalogs.vi.rankingSendFailed);assert.equal(await page.locator('#rankingReadStatus').textContent(),catalogs.vi.rankingLoaded);
  await page.reload();await page.waitForFunction(()=>game.phase==='result'&&game.submissionStatus==='failed');await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>game.finalScore),0.33);assert.ok(submissions.length>=2);assert.deepEqual(submissions.at(-1),payload);
- mode='online';await page.click('#retrySendBtn');await page.waitForFunction(()=>game.submissionStatus==='submitted');await page.waitForFunction(()=>!document.getElementById('retryRankingBtn').disabled);
+ mode='malformed';await page.click('#retrySendBtn');await page.waitForFunction(()=>game.submissionStatus==='failed');mode='online';await page.click('#retrySendBtn');await page.waitForFunction(()=>game.submissionStatus==='submitted');await page.waitForFunction(()=>!document.getElementById('retryRankingBtn').disabled);
  assert.equal(ledger.size,1);assert.deepEqual(submissions.at(-1),payload);assert.equal(await page.locator('#bestRankingList .ranking-row').count(),30);assert.equal(await page.locator('#bestRankingList img').count(),0);
  const submissionCount=submissions.length;
  for(const lang of Object.keys(catalogs)){
