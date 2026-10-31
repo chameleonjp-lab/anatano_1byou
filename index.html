@@ -727,7 +727,7 @@
         </p>
         <div class="button-stack">
           <button id="startBtn" class="btn primary" type="button">ゲームスタート</button>
-          <button id="shareGameBtn" class="btn secondary" type="button">ゲームをシェア</button>
+          <button id="shareGameBtn" class="btn secondary common-x-share" type="button">Xでシェア</button><a class="common-ranking-link" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=anatano_1byou">ランキング</a>
           <a class="btn secondary lab-button" href="https://chameleonjp-lab.github.io/chameleonjp_lab/" target="_self" rel="noopener">他のゲームで遊ぶ</a>
         </div>
       </div>
@@ -780,7 +780,7 @@
           </div>
         </div>
         <div class="button-stack">
-          <button id="shareResultBtn" class="btn secondary" type="button">ゲーム結果をシェア</button>
+          <button id="shareResultBtn" class="btn secondary common-x-share" type="button">Xでシェア</button><a class="common-ranking-link" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=anatano_1byou">ランキング</a>
           <button id="retryBtn" class="btn primary" type="button">もう一度プレイ</button>
           <button id="finishBtn" class="btn secondary" type="button">ゲーム終了</button>
         </div>
@@ -805,7 +805,64 @@
 
   <div id="toast" class="toast">クリップボードにコピーしました</div>
 
-  <script>
+  <style>
+button.common-x-share { background:#000 !important; color:#fff !important; border:1px solid #555; white-space:normal; overflow-wrap:anywhere; min-height:44px; padding:12px 16px; line-height:1.4; }
+.common-ranking-link { display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; min-height:44px; padding:12px 16px; border:1px solid currentColor; border-radius:10px; color:inherit; text-decoration:none; white-space:normal; overflow-wrap:anywhere; line-height:1.4; }
+#commonShareFallback { box-sizing:border-box; width:min(92vw,32rem); max-height:85dvh; overflow:auto; border:1px solid #777; border-radius:12px; padding:20px; background:#fff; color:#111; }
+#commonShareFallback::backdrop { background:#0009; }
+#commonShareFallback textarea { box-sizing:border-box; width:100%; min-height:160px; padding:10px; font:16px/1.5 sans-serif; color:#111; background:#fff; user-select:text; -webkit-user-select:text; }
+#commonShareFallback button { min-height:44px; margin:6px; padding:10px 16px; white-space:normal; color:#fff; background:#222; }
+</style>
+<dialog id="commonShareFallback" aria-labelledby="commonShareHeading">
+  <h2 id="commonShareHeading">共有文をコピー</h2>
+  <p>Xを開けない場合は、本文とURLをコピーして投稿できます。</p>
+  <textarea id="commonShareText" readonly aria-label="共有する本文とURL"></textarea>
+  <p id="commonShareStatus" role="status" aria-live="polite"></p>
+  <button id="commonShareCopy" type="button">コピー</button>
+  <button id="commonShareClose" type="button">閉じる</button>
+</dialog>
+<script>
+(() => {
+  'use strict';
+  const dialog = document.getElementById('commonShareFallback');
+  const field = document.getElementById('commonShareText');
+  const status = document.getElementById('commonShareStatus');
+  window.openGameShareX = (text) => {
+    const body = String(text);
+    const intent = new URL('https://x.com/intent/post');
+    intent.searchParams.set('text', body);
+    let popup;
+    try {
+      popup = window.open('', '_blank');
+      if (popup) {
+        popup.opener = null;
+        popup.location.replace(intent.href);
+        return;
+      }
+    } catch (_) {
+      try { if (popup) popup.close(); } catch (_) {}
+    }
+    field.value = body;
+    status.textContent = '';
+    if (!dialog.open) dialog.showModal();
+    field.focus();
+    field.select();
+  };
+  document.getElementById('commonShareCopy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(field.value);
+      status.textContent = 'コピーしました。投稿はXで確認してください。';
+    } catch (_) {
+      field.focus();
+      field.select();
+      status.textContent = '本文を選択して手動でコピーしてください。';
+    }
+  });
+  document.getElementById('commonShareClose').addEventListener('click', () => dialog.close());
+})();
+</script>
+
+<script>
     const GAME_TITLE = 'あなたの1秒って';
     const GAME_DESCRIPTION = '最初の3秒だけ時計を見て、あとは体感で秒数を当てるゲームです。';
     const GAME_URL_PLACEHOLDER = 'https://chameleonjp-lab.github.io/anatano_1byou/';
@@ -815,7 +872,7 @@
     const GAME_SLUG = 'anatano_1byou';
     const CLIENT_VERSION = 'anatano_1byou_v1.16_layout_fix';
     const SCORE_SCALE = 100;
-    const RANKING_LIMIT = 10;
+    const RANKING_LIMIT = 30;
 
     const BEST_KEY = 'anatano_1byo_best_score_v1';
     const LAST_KEY = 'anatano_1byo_last_result_v1';
@@ -1367,10 +1424,7 @@
     }
 
     function getGameShareUrl() {
-      if (location.protocol === 'http:' || location.protocol === 'https:') {
-        return location.href.split('#')[0];
-      }
-      return GAME_URL_PLACEHOLDER;
+      return 'https://chameleonjp.codeberg.page/anatano_1byou/';
     }
 
     function buildGameShareText() {
@@ -1622,8 +1676,8 @@
     });
     elements.tapBtn.addEventListener('click', handleTap);
     elements.retireBtn.addEventListener('click', handleRetire);
-    elements.shareGameBtn.addEventListener('click', () => copyText(buildGameShareText()));
-    elements.shareResultBtn.addEventListener('click', () => copyText(latestShareText));
+    elements.shareGameBtn.addEventListener('click', () => window.openGameShareX(buildGameShareText()));
+    elements.shareResultBtn.addEventListener('click', () => window.openGameShareX(latestShareText + '\n' + getGameShareUrl()));
     elements.nameOkBtn.addEventListener('click', confirmPlayerName);
     elements.nameCancelBtn.addEventListener('click', hideNameModal);
     elements.playerNameInput.addEventListener('keydown', (event) => {
