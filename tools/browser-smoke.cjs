@@ -47,9 +47,9 @@ try{
  const before=await page.evaluate(()=>({targets:game.targets,startedAt:game.startedAt,taps:game.taps,phase:game.phase}));
  await page.evaluate(()=>{window.gameI18n.setLanguage('vi');document.getElementById('playerNameInput').value='Changed later';});
  assert.deepEqual(await page.evaluate(()=>({targets:game.targets,startedAt:game.startedAt,taps:game.taps,phase:game.phase})),before);
- await complete();await page.waitForFunction(()=>game.submissionStatus==='pending');assert.equal(submissions.length,1);assert.equal(submissions[0].p_display_name,'名前 <>& +');assert.equal(submissions[0].p_score,33);
- const payload=submissions[0];assert.equal(await page.locator('#rankingStatus').textContent(),catalogs.vi.scorePending);assert.equal(await page.locator('#rankingReadStatus').textContent(),catalogs.vi.rankingLoaded);
- await page.reload();await page.waitForFunction(()=>game.phase==='result'&&game.submissionStatus==='pending');await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>game.finalScore),0.33);assert.ok(submissions.length>=2);assert.deepEqual(submissions.at(-1),payload);
+ await complete();await page.waitForFunction(()=>game.submissionStatus==='failed');assert.equal(submissions.length,1);assert.equal(submissions[0].p_display_name,'名前 <>& +');assert.equal(submissions[0].p_score,33);
+ const payload=submissions[0];assert.equal(await page.locator('#rankingStatus').textContent(),catalogs.vi.rankingSendFailed);assert.equal(await page.locator('#rankingReadStatus').textContent(),catalogs.vi.rankingLoaded);
+ await page.reload();await page.waitForFunction(()=>game.phase==='result'&&game.submissionStatus==='failed');await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>game.finalScore),0.33);assert.ok(submissions.length>=2);assert.deepEqual(submissions.at(-1),payload);
  mode='online';await page.click('#retrySendBtn');await page.waitForFunction(()=>game.submissionStatus==='submitted');await page.waitForFunction(()=>!document.getElementById('retryRankingBtn').disabled);
  assert.equal(ledger.size,1);assert.deepEqual(submissions.at(-1),payload);assert.equal(await page.locator('#bestRankingList .ranking-row').count(),30);assert.equal(await page.locator('#bestRankingList img').count(),0);
  const submissionCount=submissions.length;

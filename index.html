@@ -1664,7 +1664,7 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
       send:payload=>callSupabaseRpc('submit_score_once_shared_v1',payload),
       onChange(item,receipt){
         if(game.phase!=='result'||game.play?.id!==item.id)return;
-        game.submissionStatus=item.state;saveResultSnapshot();renderSubmissionStatus();
+        game.submissionStatus=item.state==='pending'&&game.submissionStatus==='sending'?'failed':item.state;saveResultSnapshot();renderSubmissionStatus();
         if(receipt)void loadRankings(resultToken);
       }
     });
