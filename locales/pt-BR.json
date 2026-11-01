@@ -88,5 +88,6 @@
   "scorePending": "Sua pontuação está pendente. O mesmo resultado será reenviado quando a conexão voltar.",
   "soundOn": "Som: ligado",
   "soundOff": "Som: desligado",
-  "volume": "Volume"
+  "volume": "Volume",
+  "resultUnsaved": "Não foi possível salvar o resultado neste dispositivo. Ele pode ser perdido ao fechar esta tela."
 }

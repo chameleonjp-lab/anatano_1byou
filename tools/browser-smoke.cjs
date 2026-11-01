@@ -1,4 +1,5 @@
-const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const {chromium,webkit}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const engine=process.env.BROWSER==='webkit'?webkit:chromium;
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 (async()=>{
 const root=path.resolve(__dirname,'..');const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
@@ -6,7 +7,7 @@ const catalogs=JSON.parse(html.match(/<script id="locale-catalogs" type="applica
 const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(html)});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;
 try{
- browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{}),args:['--no-sandbox']});
+ browser=await engine.launch({headless:true,...(engine===chromium?{args:['--no-sandbox'],...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})}: {})});
  const page=await browser.newPage({viewport:{width:402,height:874},locale:'ja-JP'});let errors=[],submissions=[],mode='offline',rankMode='normal',raceCalls=0;const ledger=new Map();
  page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{window.open=()=>null;window.__audioContexts=0;const Original=window.AudioContext;if(Original)window.AudioContext=class extends Original{constructor(...args){super(...args);window.__audioContexts++;}};});
@@ -15,7 +16,7 @@ try{
   if(rpc==='submit_score_once_shared_v1'){
    const payload=route.request().postDataJSON();submissions.push(payload);const duplicate=ledger.has(payload.p_submission_id);ledger.set(payload.p_submission_id,payload);
    if(mode==='malformed'){await route.fulfill({json:{}});return;}if(mode==='offline'){await route.fulfill({status:503,json:{code:'network_error'}});return;}
-   await route.fulfill({json:[{accepted:true,result_display_name:payload.p_display_name,result_normalized_name:payload.p_display_name,result_first_score:payload.p_score,result_best_score:payload.p_score,result_play_count:1,was_duplicate:duplicate}]});return;
+   await route.fulfill({json:[{accepted:true,result_display_name:payload.p_display_name,result_normalized_name:payload.p_display_name,result_first_score:payload.p_score,result_best_score:payload.p_score,result_play_count:1,was_duplicate:duplicate,is_first_play:!duplicate,is_new_best:true}]});return;
   }
   assert.notEqual(rpc,'submit_score','unsafe legacy submission must never be used');
   if(rpc==='get_game_play_stats'){await route.fulfill({json:[{total_play_count:50,player_count:35}]});return;}
@@ -63,7 +64,11 @@ try{
  rankMode='malformed';await page.click('#retryRankingBtn');await page.waitForFunction(()=>!document.getElementById('retryRankingBtn').disabled);assert.equal(await page.locator('#rankingReadStatus').textContent(),catalogs.th.rankingLoadFailed);
  rankMode='empty';await page.click('#retryRankingBtn');await page.waitForFunction(()=>!document.getElementById('retryRankingBtn').disabled);assert.equal(await page.locator('#bestRankingList').textContent(),catalogs.th.noRecords);
  await page.click('#finishBtn');await page.fill('#playerNameInput','');await page.locator('#playerNameInput').dispatchEvent('change');await page.reload();assert.equal(await page.locator('#playerNameInput').inputValue(),'');assert.equal(await page.evaluate(()=>localStorage.getItem('anatano_1byo_best_score_v1')),'0.33');
- assert.equal(await page.evaluate(()=>window.gameAudio.enabled),false);assert.equal(await page.evaluate(()=>window.gameAudio.volume),0);assert.deepEqual(errors,[]);
+ assert.equal(await page.evaluate(()=>window.gameAudio.enabled),false);assert.equal(await page.evaluate(()=>window.gameAudio.volume),0);await page.waitForFunction(()=>game.phase==='result');await page.click('#finishBtn');await page.selectOption('#languageSelect','en');rankMode='normal';
+ await page.fill('#playerNameInput','Quota test');await page.evaluate(()=>{window.__setItem=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.startsWith('anatano_1byou:score-pending:')||k==='anatano_1byou_result_v2')throw new DOMException('quota','QuotaExceededError');return window.__setItem.call(this,k,v)}});
+ const quotaBefore=submissions.length;await page.click('#startBtn');await complete();assert.equal(submissions.length,quotaBefore);assert.equal(await page.locator('#rankingStatus').textContent(),catalogs.en.resultUnsaved);assert.equal(await page.evaluate(()=>game.finalScore),0.33);
+ await page.evaluate(()=>{Storage.prototype.setItem=window.__setItem});await page.click('#retrySendBtn');await page.waitForFunction(()=>game.submissionStatus==='submitted');assert.equal(submissions.length,quotaBefore+1);const quotaPayload=submissions.at(-1);await page.reload();await page.waitForFunction(()=>game.phase==='result');assert.equal(submissions.length,quotaBefore+1);assert.equal(await page.evaluate(()=>game.play.id),quotaPayload.p_submission_id);
+ assert.deepEqual(errors,[]);
  console.log(JSON.stringify({languages:Object.keys(catalogs).length,guestCases:3,score:0.33,submissionAttempts:submissions.length,distinctSubmissionIds:ledger.size,unchangedLanguageState:true,top30:true,rankingRace:true,rankingFailureAndEmpty:true,soundOffZeroPreserved:true,productionWrites:0}));
 }finally{await browser?.close();await new Promise(r=>server.close(r));}
 })().catch(error=>{console.error(error);process.exitCode=1});

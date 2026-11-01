@@ -88,5 +88,6 @@
   "scorePending": "Your score is pending. The same result will be retried when the connection returns.",
   "soundOn": "Sound: on",
   "soundOff": "Sound: off",
-  "volume": "Volume"
+  "volume": "Volume",
+  "resultUnsaved": "Your result could not be saved on this device. Closing this screen may lose it."
 }

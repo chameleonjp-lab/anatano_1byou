@@ -88,5 +88,6 @@
   "scorePending": "Skor menunggu pengiriman. Hasil yang sama akan dikirim ulang setelah koneksi pulih.",
   "soundOn": "Suara: aktif",
   "soundOff": "Suara: nonaktif",
-  "volume": "Volume"
+  "volume": "Volume",
+  "resultUnsaved": "Hasil tidak dapat disimpan di perangkat ini. Hasil mungkin hilang jika layar ini ditutup."
 }

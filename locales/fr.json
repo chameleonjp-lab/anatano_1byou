@@ -88,5 +88,6 @@
   "scorePending": "Votre score est en attente. Le même résultat sera renvoyé au retour de la connexion.",
   "soundOn": "Son : activé",
   "soundOff": "Son : désactivé",
-  "volume": "Volume"
+  "volume": "Volume",
+  "resultUnsaved": "Le résultat n’a pas pu être enregistré sur cet appareil. Fermer cet écran risque de le perdre."
 }

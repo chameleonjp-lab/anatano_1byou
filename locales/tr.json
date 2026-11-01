@@ -88,5 +88,6 @@
   "scorePending": "Sonucunuz gönderilmeyi bekliyor. Bağlantı geri geldiğinde aynı sonuç yeniden gönderilecek.",
   "soundOn": "Ses: açık",
   "soundOff": "Ses: kapalı",
-  "volume": "Ses düzeyi"
+  "volume": "Ses düzeyi",
+  "resultUnsaved": "Sonucun bu cihaza kaydedilemedi. Bu ekranı kapatırsan sonuç kaybolabilir."
 }

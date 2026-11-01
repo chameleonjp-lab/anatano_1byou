@@ -88,5 +88,6 @@
   "scorePending": "Il risultato è in attesa. Lo stesso risultato sarà reinviato quando torna la connessione.",
   "soundOn": "Audio: attivo",
   "soundOff": "Audio: disattivato",
-  "volume": "Volume"
+  "volume": "Volume",
+  "resultUnsaved": "Impossibile salvare il risultato su questo dispositivo. Chiudendo questa schermata potresti perderlo."
 }

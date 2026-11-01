@@ -88,5 +88,6 @@
   "scorePending": "Dein Ergebnis wartet auf die Übertragung. Bei erneuter Verbindung wird dasselbe Ergebnis nochmals gesendet.",
   "soundOn": "Ton: an",
   "soundOff": "Ton: aus",
-  "volume": "Lautstärke"
+  "volume": "Lautstärke",
+  "resultUnsaved": "Dein Ergebnis konnte auf diesem Gerät nicht gespeichert werden. Wenn du diesen Bildschirm schließt, kann es verloren gehen."
 }

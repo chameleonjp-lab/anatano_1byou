@@ -88,5 +88,6 @@
   "scorePending": "成績等待提交。網路恢復後將重試提交同一結果。",
   "soundOn": "音效：開",
   "soundOff": "音效：關",
-  "volume": "音量"
+  "volume": "音量",
+  "resultUnsaved": "無法在此裝置上儲存結果。關閉此畫面可能會遺失結果。"
 }

@@ -88,5 +88,6 @@
   "scorePending": "Tu puntuación está pendiente. Se reenviará el mismo resultado cuando vuelva la conexión.",
   "soundOn": "Sonido: activado",
   "soundOff": "Sonido: desactivado",
-  "volume": "Volumen"
+  "volume": "Volumen",
+  "resultUnsaved": "No se pudo guardar el resultado en este dispositivo. Si cierras esta pantalla, podría perderse."
 }

@@ -88,5 +88,6 @@
   "scorePending": "Thành tích đang chờ gửi. Cùng kết quả này sẽ được gửi lại khi có kết nối.",
   "soundOn": "Âm thanh: bật",
   "soundOff": "Âm thanh: tắt",
-  "volume": "Âm lượng"
+  "volume": "Âm lượng",
+  "resultUnsaved": "Không thể lưu kết quả trên thiết bị này. Kết quả có thể bị mất nếu bạn đóng màn hình này."
 }
