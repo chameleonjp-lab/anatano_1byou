@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Validate the single-file release and optionally stage only its public file."""
+import hashlib
+import struct
 import argparse
 import json
 import re
@@ -81,6 +83,9 @@ def main():
                 checked += 1
     if checked == 0:
         raise ValueError('No executable game script found')
+    preview = (ROOT / 'assets/social-preview.png').read_bytes()
+    if preview[:8] != b'\x89PNG\r\n\x1a\n' or struct.unpack('>II', preview[16:24]) != (1200, 630):
+        raise ValueError('Expected a 1200x630 social PNG')
     if options.out:
         output = options.out.resolve()
         if output == ROOT or ROOT not in output.parents or output.name != '_site':
@@ -89,8 +94,12 @@ def main():
             raise ValueError('Output is nonempty; preserve it and choose a fresh staging workspace')
         output.mkdir(exist_ok=True)
         shutil.copy2(ROOT / 'index.html', output / 'index.html')
+        (output / 'assets').mkdir()
+        shutil.copy2(ROOT / 'assets/social-preview.png', output / 'assets/social-preview.png')
+        if (output / 'assets/social-preview.png').read_bytes() != preview:
+            raise ValueError('Staged social image bytes do not match source')
         (output / '.nojekyll').touch()
-    print(f'Validated index.html: {checked} JavaScript blocks; single-file public release')
+    print(f'Validated index.html: {checked} JavaScript blocks; single HTML + byte-verified social PNG public release')
 
 
 if __name__ == '__main__':
