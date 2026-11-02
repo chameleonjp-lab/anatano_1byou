@@ -3,13 +3,13 @@ name: Validate and deploy Pages
 on:
   pull_request:
   push:
-    branches: ["main"]
+    branches: ["main", "work/share-visibility-20261102"]
 
 permissions:
   contents: read
 
 concurrency:
-  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -31,16 +31,26 @@ jobs:
         run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.62.1
       - run: node tools/browser-smoke.cjs
       - run: BROWSER=webkit node tools/browser-smoke.cjs
+      - run: node tools/share-visual.cjs
+      - run: BROWSER=webkit node tools/share-visual.cjs
+      - name: Retain mock-only sharing screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: anatano-sharing-acceptance
+          path: test-artifacts/*.png
+          retention-days: 3
+          if-no-files-found: warn
       - name: Stage the validated public file
         run: python3 tools/check-site.py --out _site
       - name: Upload this commit's Pages artifact
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
   deploy:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 10

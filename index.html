@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title data-i18n="gameTitle">あなたの1秒って</title>
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://chameleonjp.codeberg.page/anatano_1byou/" />
+  <meta property="og:title" content="あなたの1秒って" />
+  <meta property="og:description" content="最初の3秒だけ時計を見て、あとは感覚でお題の秒数に合わせるゲーム。" />
+  <meta property="og:image" content="https://chameleonjp-lab.github.io/anatano_1byou/assets/social-preview.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="あなたの1秒って：実ゲームのお題・感覚で押す案内・3回のタップ欄" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://chameleonjp-lab.github.io/anatano_1byou/assets/social-preview.png" />
+  <meta name="twitter:image:alt" content="あなたの1秒ってのゲーム画面を使った紹介画像" />
   <!-- version: v1.16 layout-fix / ranking / single index.html -->
   <style>
     :root {
@@ -1596,7 +1608,7 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
           t('shareTaps',{taps:game.taps.map(formatSeconds).join(' / ')}),t('finalScore',{score:game.finalScore.toFixed(2)}));
         if(game.senseResult)parts.push(t('senseOne',{seconds:game.senseResult.oneSecondSense.toFixed(2)}));
       }else parts.push(t('elapsed',{seconds:(game.resultType==='timeout'?MAX_SECONDS:game.endedAt).toFixed(2)}),t('tapCount',{count:game.taps.length,total:3}));
-      return parts.join('\n');
+      return [...parts, '#あなたの1秒って #ゲーム制作'].join('\n');
     }
 
     function getGameShareUrl() {
@@ -1604,7 +1616,7 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
     }
 
     function buildGameShareText() {
-      return [t('gameTitle'), t('shareDescription'), getGameShareUrl()].join('\n');
+      return [t('gameTitle'), t('shareDescription'), '#あなたの1秒って #ゲーム制作', getGameShareUrl()].join('\n');
     }
 
     function scoreSecondsToSubmit(scoreSeconds) {
