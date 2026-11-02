@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>あなたの1秒って</title>
+  <title data-i18n="gameTitle">あなたの1秒って</title>
   <!-- version: v1.16 layout-fix / ranking / single index.html -->
   <style>
     :root {
@@ -702,33 +702,50 @@
       margin-bottom: 10px;
     }
 
+
+    body[data-screen="home"],body[data-screen="game"] {overflow-y:auto;}
+    .audio-controls{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:8px;margin:8px 0;}
+    .audio-controls button{grid-column:1/-1;min-height:44px;}
+    .audio-controls input{min-width:0;min-height:44px;width:100%;}
+    .name-home {margin:8px 0;text-align:left;}
+    .name-home .notice {margin-top:6px;padding:0;}
+    .name-home .name-error {min-height:0;margin:4px 0;}
+    .language-control {display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0;}
+    .language-control select {font:inherit;font-size:16px;min-height:44px;max-width:70%;padding:6px;}
+    .home-card {height:auto;min-height:calc(100svh - 12px);overflow:visible;}
+    .title,.result-title,.btn,.clock.note {overflow-wrap:anywhere;white-space:normal;}
+    .title {line-height:1.15;}
+    .clock.note {white-space:pre-line;font-size:clamp(1.2rem,6vw,2rem);}
+    .ranking-name {overflow-wrap:anywhere;min-width:0;}
+    @media(max-height:700px){.game-card{min-height:420px;height:auto;}.home-card{height:auto;}}
 </style>
 </head>
 <body data-screen="home">
   <main class="app" aria-live="polite">
     <section id="homeScreen" class="screen active">
       <div class="card home-card">
-        <h1 class="title">あなたの<br />1秒って</h1>
+        <h1 class="title" data-i18n="gameTitle">あなたの1秒って</h1>
+        <label class="language-control"><span data-i18n="language">言語</span><select id="languageSelect" aria-label="言語" data-i18n="language" data-i18n-attr="aria-label"></select></label>
         <div id="bestDisplay" class="best-box">ベストスコア（合計誤差）：まだありません</div>
+        <div class="name-home">
+          <label for="playerNameInput" data-i18n="nameTitle">名前を入力</label>
+          <input id="playerNameInput" data-i18n="namePlaceholder" data-i18n-attr="placeholder" class="name-input" type="text" autocomplete="nickname" aria-describedby="nameDisclosure nameError" />
+          <p id="nameDisclosure" class="notice" data-i18n="nameDisclosure"></p>
+          <div id="nameError" class="name-error" role="status"></div>
+        </div>
         <div id="playerNameDisplay" class="player-box" hidden></div>
         <div id="gameStats" class="stats-box" hidden></div>
-        <p class="lead">
-          最初の3秒だけ時計が見えます。<br />
-          そのあとは自分の感覚だけで、<br />
-          お題の秒数に合わせて<br />
-          ボタンを押してください。<br />
-          ズレが小さいほど高記録です。
-        </p>
+        <p class="lead" data-i18n="intro"></p>
         <p id="lastDisplay" class="notice" hidden></p>
-        <p class="notice">
-          ベストスコア（合計誤差）は、このブラウザ内に保存されます。<br />
-          保存データを消すと記録が消える場合があります。<br />
-          別の端末では表示されません。
-        </p>
+        <p class="notice" data-i18n="localNotice"></p>
+        <div class="audio-controls">
+          <button id="soundToggle" class="btn secondary" type="button" aria-pressed="true"></button>
+          <label for="soundVolume" data-i18n="volume"></label><input id="soundVolume" type="range" min="0" max="1" step="0.05" />
+        </div>
         <div class="button-stack">
-          <button id="startBtn" class="btn primary" type="button">ゲームスタート</button>
-          <button id="shareGameBtn" class="btn secondary" type="button">ゲームをシェア</button>
-          <a class="btn secondary lab-button" href="https://chameleonjp-lab.github.io/chameleonjp_lab/" target="_self" rel="noopener">他のゲームで遊ぶ</a>
+          <button id="startBtn" data-i18n="start" class="btn primary" type="button">ゲームスタート</button>
+          <button id="shareGameBtn" data-i18n="shareX" class="btn secondary common-x-share" type="button">Xでシェア</button><a class="common-ranking-link" data-i18n="ranking" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=anatano_1byou">ランキング</a>
+          <a class="btn secondary lab-button" data-i18n="otherGames" href="https://chameleonjp-lab.github.io/chameleonjp_lab/" target="_self" rel="noopener">他のゲームで遊ぶ</a>
         </div>
       </div>
     </section>
@@ -736,12 +753,12 @@
     <section id="gameScreen" class="screen">
       <div class="card game-card">
         <div class="top-bar">
-          <div id="statusText" class="status">準備中</div>
-          <button id="retireBtn" class="retire-btn" type="button">リタイア</button>
+          <div id="statusText" data-i18n="preparing" class="status">準備中</div>
+          <button id="retireBtn" data-i18n="retire" class="retire-btn" type="button">リタイア</button>
         </div>
 
         <div class="target-area">
-          <div class="label">お題</div>
+          <div class="label" data-i18n="targets">お題</div>
           <div id="targetList" class="targets"></div>
         </div>
 
@@ -749,77 +766,326 @@
           <div id="clockDisplay" class="clock">3</div>
         </div>
 
-        <div class="results-grid" aria-label="タップ結果">
-          <div class="tap-slot"><small>1回目</small><strong id="tapResult0">--.--秒</strong></div>
-          <div class="tap-slot"><small>2回目</small><strong id="tapResult1">--.--秒</strong></div>
-          <div class="tap-slot"><small>3回目</small><strong id="tapResult2">--.--秒</strong></div>
+        <div class="results-grid" aria-label="タップ結果" data-i18n="resultsAria" data-i18n-attr="aria-label">
+          <div class="tap-slot"><small data-i18n="attempt" data-i18n-params='{"n":1}'>1回目</small><strong id="tapResult0">--.--秒</strong></div>
+          <div class="tap-slot"><small data-i18n="attempt" data-i18n-params='{"n":2}'>2回目</small><strong id="tapResult1">--.--秒</strong></div>
+          <div class="tap-slot"><small data-i18n="attempt" data-i18n-params='{"n":3}'>3回目</small><strong id="tapResult2">--.--秒</strong></div>
         </div>
 
-        <button id="tapBtn" class="btn primary tap" type="button" disabled>ここで押す</button>
+        <button id="tapBtn" data-i18n="tap" class="btn primary tap" type="button" disabled>ここで押す</button>
       </div>
     </section>
 
     <section id="resultScreen" class="screen">
       <div class="card result-card">
-        <h2 class="result-title">あなたの1秒って</h2>
+        <h2 class="result-title" data-i18n="gameTitle">あなたの1秒って</h2>
         <div id="resultState" class="result-state">結果：クリア</div>
         <div id="resultSummary" class="score-box"></div>
         <div id="resultList" class="result-list"></div>
         <div id="finalScore" class="final-score"></div>
         <div id="senseScore" class="sense-score" hidden></div>
-        <div id="bestUpdate" class="best-update" hidden>ベスト更新！</div>
-        <div id="rankingStatus" class="ranking-status" hidden></div>
+        <div id="bestUpdate" data-i18n="bestUpdated" class="best-update" hidden>ベスト更新！</div>
+        <div id="rankingStatus" class="ranking-status" role="status" hidden></div>
+        <button id="retrySendBtn" class="btn secondary" type="button" data-i18n="retrySend" hidden></button>
+        <div id="rankingReadStatus" class="ranking-status" role="status" hidden></div>
+        <button id="retryRankingBtn" class="btn secondary" type="button" data-i18n="retryRanking" hidden></button>
+        <div class="button-stack">
+          <button id="shareResultBtn" data-i18n="shareX" class="btn secondary common-x-share" type="button">Xでシェア</button><a class="common-ranking-link" data-i18n="ranking" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=anatano_1byou">ランキング</a>
+          <button id="retryBtn" data-i18n="retry" class="btn primary" type="button">もう一度プレイ</button>
+          <button id="finishBtn" data-i18n="finish" class="btn secondary" type="button">ゲーム終了</button>
+        </div>
         <div id="rankingArea" class="ranking-area" hidden>
           <div class="ranking-card">
-            <h3>ベストランキング</h3>
+            <h3 data-i18n="bestRanking">ベストランキング</h3>
             <div id="bestRankingList" class="ranking-list"></div>
           </div>
           <div class="ranking-card">
-            <h3>初回ランキング</h3>
+            <h3 data-i18n="firstRanking">初回ランキング</h3>
             <div id="firstRankingList" class="ranking-list"></div>
           </div>
         </div>
-        <div class="button-stack">
-          <button id="shareResultBtn" class="btn secondary" type="button">ゲーム結果をシェア</button>
-          <button id="retryBtn" class="btn primary" type="button">もう一度プレイ</button>
-          <button id="finishBtn" class="btn secondary" type="button">ゲーム終了</button>
-        </div>
+
       </div>
     </section>
   </main>
 
 
-  <div id="nameModal" class="modal-backdrop" hidden>
-    <div class="name-modal" role="dialog" aria-modal="true" aria-labelledby="nameModalTitle">
-      <h2 id="nameModalTitle">名前を入力</h2>
-      <p>ランキングに使う名前を入力してください。<br />最大20文字です。</p>
-      <input id="playerNameInput" class="name-input" type="text" maxlength="20" autocomplete="nickname" placeholder="名前" />
-      <div id="nameError" class="name-error"></div>
-      <div class="button-stack">
-        <button id="nameOkBtn" class="btn primary" type="button">この名前で始める</button>
-        <button id="nameCancelBtn" class="btn secondary" type="button">戻る</button>
-      </div>
-    </div>
-  </div>
+  <div id="toast" data-i18n="clipboardCopied" class="toast">クリップボードにコピーしました</div>
 
+  <style>
+button.common-x-share { background:#000 !important; color:#fff !important; border:1px solid #555; white-space:normal; overflow-wrap:anywhere; min-height:44px; padding:12px 16px; line-height:1.4; }
+.common-ranking-link { display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; min-height:44px; padding:12px 16px; border:1px solid currentColor; border-radius:10px; color:inherit; text-decoration:none; white-space:normal; overflow-wrap:anywhere; line-height:1.4; }
+#commonShareFallback { box-sizing:border-box; width:min(92vw,32rem); max-height:85dvh; overflow:auto; border:1px solid #777; border-radius:12px; padding:20px; background:#fff; color:#111; }
+#commonShareFallback::backdrop { background:#0009; }
+#commonShareFallback textarea { box-sizing:border-box; width:100%; min-height:160px; padding:10px; font:16px/1.5 sans-serif; color:#111; background:#fff; user-select:text; -webkit-user-select:text; }
+#commonShareFallback button { min-height:44px; margin:6px; padding:10px 16px; white-space:normal; color:#fff; background:#222; }
+</style>
+<dialog id="commonShareFallback" aria-labelledby="commonShareHeading">
+  <h2 id="commonShareHeading" data-i18n="copyHeading">共有文をコピー</h2>
+  <p data-i18n="copyHelp"></p>
+  <textarea id="commonShareText" data-i18n="copyTextAria" data-i18n-attr="aria-label" readonly aria-label="共有する本文とURL"></textarea>
+  <p id="commonShareStatus" role="status" aria-live="polite"></p>
+  <button id="commonShareCopy" data-i18n="copy" type="button">コピー</button>
+  <button id="commonShareClose" data-i18n="close" type="button">閉じる</button>
+</dialog>
+<script id="locale-catalogs" type="application/json">{"ja":{"gameTitle":"あなたの1秒って","language":"言語","bestNone":"ベストスコア（合計誤差）：まだありません","bestScore":"ベストスコア（合計誤差）：{score}秒","playerName":"ランキング名：{name}","stats":"参加人数：{players}人 / プレイ回数：{plays}回","lastResult":"前回：{result}","intro":"最初の3秒だけ時計が見えます。そのあとは自分の感覚で、お題の秒数に合わせて3回ボタンを押してください。合計誤差が小さいほど高記録です。","localNotice":"ベストスコアはこのブラウザに保存されます。保存データを消すと失われる場合があり、別の端末には引き継がれません。","start":"ゲームスタート","shareX":"Xでシェア","ranking":"ランキング","otherGames":"他のゲームで遊ぶ","preparing":"準備中","retire":"リタイア","targets":"お題","resultsAria":"タップ結果","attempt":"{n}回目","seconds":"{value}秒","tap":"ここで押す","result":"結果：{result}","clear":"クリア","timeout":"時間切れ","bestUpdated":"ベスト更新！","bestRanking":"ベストランキング","firstRanking":"初回ランキング","retry":"もう一度プレイ","finish":"ゲーム終了","nameTitle":"名前を入力","nameDescription":"ランキングに使う名前を入力してください。最大20文字です。","namePlaceholder":"名前","nameStart":"この名前で始める","back":"戻る","nameRequired":"名前を入力してください","nameTooLong":"名前は20文字以内にしてください","copyHeading":"共有文をコピー","copyHelp":"Xを開けない場合は、本文とURLをコピーして投稿できます。","copyTextAria":"共有する本文とURL","copy":"コピー","close":"閉じる","copied":"コピーしました。投稿はXで確認してください。","copyManual":"本文を選択して手動でコピーしてください。","clipboardCopied":"クリップボードにコピーしました","copyFailed":"コピーできませんでした","go":"スタート","measuring":"計測中 {count} / {total}","feelTime":"感覚で\n押してください","ended":"終了","measurementEnded":"計測終了！\n結果を確認します","senseExact":"ほぼぴったり","senseSlow":"実際より少しゆっくりめ","senseFast":"実際より少し早め","tapCount":"タップ回数：{count}回 / {total}回","elapsedTaps":"経過秒数：{seconds}秒 / タップ回数：{count}回 / {total}回","finalScore":"最終スコア：{score}秒","finalState":"最終スコア：{result}","rowTarget":"お題{n}：{seconds}秒","rowTap":"タップ：{value}","rowDiff":"差分：{value}","noTap":"未タップ","none":"なし","senseOne":"あなたの1秒感覚：{seconds}秒","senseDrift":"1秒あたりのズレ：{seconds}秒","senseAverage":"平均ズレ：{seconds}秒 / {label}","shareDescription":"最初の3秒だけ時計を見て、あとは体感で秒数を当てるゲームです。","shareResultTitle":"{game} 結果","shareTargets":"お題：{targets}","shareTaps":"タップ：{taps}","elapsed":"経過秒数：{seconds}秒","rankingUnavailable":"ランキングは現在利用できません。今回の結果は画面に残ります。","rankingSending":"ランキング送信中…","rankingSendFailed":"ランキング送信に失敗しました。今回の結果は画面に残ります。","rankingLoading":"ランキング取得中…","rankingSent":"ランキングに反映しました","rankingLoaded":"ランキングを取得しました","rankingLoadFailed":"ランキング取得に失敗しました。結果表示はそのまま残ります。","unnamed":"名無し","noRecords":"まだ記録がありません","rank":"{rank}位","rankingScore":"{score}秒","rankingScorePlays":"{score}秒 / {plays}回","nameDisclosure":"名前を入力すると、名前と記録がランキングに公開されます。空欄でも遊べます。","retrySend":"記録の送信を再試行","retryRanking":"ランキングを再取得","guestResult":"名前なしのプレイです。記録は公開しません。","notSubmitted":"未クリアのため、記録はランキングに送信しません。","scorePending":"記録は送信待ちです。通信回復時に同じ記録を再送します。","soundOn":"効果音：オン","soundOff":"効果音：オフ","volume":"音量","resultUnsaved":"端末に結果を保存できません。画面を閉じると失われる場合があります。"},"en":{"gameTitle":"Your One Second","language":"Language","bestNone":"Best total error: no record yet","bestScore":"Best total error: {score} s","playerName":"Ranking name: {name}","stats":"Players: {players} / Plays: {plays}","lastResult":"Last result: {result}","intro":"The clock is visible for the first 3 seconds. Then use your sense of time to tap once at each of the 3 target times. A smaller total error is better.","localNotice":"Your best score is saved in this browser. Clearing browser data may erase it. It does not transfer to another device.","start":"Start game","shareX":"Share on X","ranking":"Rankings","otherGames":"Play other games","preparing":"Get ready","retire":"Retire","targets":"Target times","resultsAria":"Tap results","attempt":"Tap {n}","seconds":"{value} s","tap":"Tap here","result":"Result: {result}","clear":"Completed","timeout":"Time up","bestUpdated":"New best!","bestRanking":"Best-score rankings","firstRanking":"First-play rankings","retry":"Play again","finish":"Back to home","nameTitle":"Enter a name","nameDescription":"Enter a name for the rankings, up to 20 characters.","namePlaceholder":"Name","nameStart":"Start with this name","back":"Back","nameRequired":"Please enter a name.","nameTooLong":"Use no more than 20 characters.","copyHeading":"Copy share text","copyHelp":"If X does not open, copy the text and URL to create your post.","copyTextAria":"Text and URL to share","copy":"Copy","close":"Close","copied":"Copied. Review and publish your post on X.","copyManual":"Select the text and copy it manually.","clipboardCopied":"Copied to clipboard","copyFailed":"Could not copy","go":"Go","measuring":"Timing {count} / {total}","feelTime":"Trust your\nsense of time","ended":"Finished","measurementEnded":"Timing finished!\nPreparing results","senseExact":"Almost exact","senseSlow":"Your sense of time runs a little slow","senseFast":"Your sense of time runs a little fast","tapCount":"Taps: {count} / {total}","elapsedTaps":"Elapsed: {seconds} s / Taps: {count} / {total}","finalScore":"Final total error: {score} s","finalState":"Final result: {result}","rowTarget":"Target {n}: {seconds} s","rowTap":"Tap: {value}","rowDiff":"Error: {value}","noTap":"Not tapped","none":"None","senseOne":"Your perceived second: {seconds} s","senseDrift":"Drift per second: {seconds} s","senseAverage":"Average error: {seconds} s / {label}","shareDescription":"Watch the clock for 3 seconds, then hit the target times by feel.","shareResultTitle":"{game} — Result","shareTargets":"Targets: {targets}","shareTaps":"Taps: {taps}","elapsed":"Elapsed: {seconds} s","rankingUnavailable":"Rankings are currently unavailable. Your result remains on screen.","rankingSending":"Submitting score…","rankingSendFailed":"Could not submit your score. Your result remains on screen.","rankingLoading":"Loading rankings…","rankingSent":"Score submitted","rankingLoaded":"Rankings loaded","rankingLoadFailed":"Could not load rankings. Your result remains on screen.","unnamed":"Unnamed","noRecords":"No records yet","rank":"#{rank}","rankingScore":"{score} s","rankingScorePlays":"{score} s / {plays} plays","nameDisclosure":"If you enter a name, your name and score will be public in the rankings. You can play with this blank.","retrySend":"Retry score submission","retryRanking":"Reload rankings","guestResult":"You played without a name. This score will not be public.","notSubmitted":"This run was not completed. No score will be submitted.","scorePending":"Your score is pending. The same result will be retried when the connection returns.","soundOn":"Sound: on","soundOff":"Sound: off","volume":"Volume","resultUnsaved":"Your result could not be saved on this device. Closing this screen may lose it."},"es":{"gameTitle":"Tu segundo","language":"Idioma","bestNone":"Mejor error total: sin récord","bestScore":"Mejor error total: {score} s","playerName":"Nombre en la clasificación: {name}","stats":"Jugadores: {players} / Partidas: {plays}","lastResult":"Último resultado: {result}","intro":"El reloj se ve durante los primeros 3 segundos. Después, usa tu sentido del tiempo para tocar una vez en cada uno de los 3 tiempos objetivo. Cuanto menor sea el error total, mejor.","localNotice":"Tu récord se guarda en este navegador. Borrar sus datos puede eliminarlo. No se transfiere a otro dispositivo.","start":"Empezar partida","shareX":"Compartir en X","ranking":"Clasificación","otherGames":"Jugar a otros juegos","preparing":"Prepárate","retire":"Abandonar","targets":"Tiempos objetivo","resultsAria":"Resultados de los toques","attempt":"Toque {n}","seconds":"{value} s","tap":"Toca aquí","result":"Resultado: {result}","clear":"Completado","timeout":"Tiempo agotado","bestUpdated":"¡Nuevo récord!","bestRanking":"Clasificación de mejores resultados","firstRanking":"Clasificación del primer intento","retry":"Volver a jugar","finish":"Volver al inicio","nameTitle":"Introduce un nombre","nameDescription":"Introduce un nombre de hasta 20 caracteres para la clasificación.","namePlaceholder":"Nombre","nameStart":"Empezar con este nombre","back":"Volver","nameRequired":"Introduce un nombre.","nameTooLong":"Usa un máximo de 20 caracteres.","copyHeading":"Copiar el texto para compartir","copyHelp":"Si X no se abre, copia el texto y la URL para crear tu publicación.","copyTextAria":"Texto y URL para compartir","copy":"Copiar","close":"Cerrar","copied":"Copiado. Revisa y publica tu mensaje en X.","copyManual":"Selecciona el texto y cópialo manualmente.","clipboardCopied":"Copiado al portapapeles","copyFailed":"No se pudo copiar","go":"Ya","measuring":"Midiendo {count} / {total}","feelTime":"Confía en tu\nsentido del tiempo","ended":"Terminado","measurementEnded":"¡Medición terminada!\nPreparando los resultados","senseExact":"Casi exacto","senseSlow":"Tu percepción del tiempo va un poco lenta","senseFast":"Tu percepción del tiempo va un poco rápida","tapCount":"Toques: {count} / {total}","elapsedTaps":"Tiempo: {seconds} s / Toques: {count} / {total}","finalScore":"Error total final: {score} s","finalState":"Resultado final: {result}","rowTarget":"Objetivo {n}: {seconds} s","rowTap":"Toque: {value}","rowDiff":"Error: {value}","noTap":"Sin toque","none":"Ninguno","senseOne":"Tu segundo percibido: {seconds} s","senseDrift":"Desviación por segundo: {seconds} s","senseAverage":"Error medio: {seconds} s / {label}","shareDescription":"Mira el reloj durante 3 segundos y alcanza los tiempos objetivo con tu sentido del tiempo.","shareResultTitle":"{game} — Resultado","shareTargets":"Objetivos: {targets}","shareTaps":"Toques: {taps}","elapsed":"Tiempo transcurrido: {seconds} s","rankingUnavailable":"La clasificación no está disponible. Tu resultado sigue en pantalla.","rankingSending":"Enviando el resultado…","rankingSendFailed":"No se pudo enviar el resultado. Sigue en pantalla.","rankingLoading":"Cargando la clasificación…","rankingSent":"Resultado enviado","rankingLoaded":"Clasificación cargada","rankingLoadFailed":"No se pudo cargar la clasificación. Tu resultado sigue en pantalla.","unnamed":"Sin nombre","noRecords":"Todavía no hay registros","rank":"Puesto {rank}","rankingScore":"{score} s","rankingScorePlays":"{score} s / {plays} partidas","nameDisclosure":"Si introduces un nombre, tu nombre y puntuación serán públicos en la clasificación. Puedes jugar sin escribirlo.","retrySend":"Reintentar envío","retryRanking":"Recargar clasificación","guestResult":"Has jugado sin nombre. Esta puntuación no se publicará.","notSubmitted":"La partida no se completó. No se enviará la puntuación.","scorePending":"Tu puntuación está pendiente. Se reenviará el mismo resultado cuando vuelva la conexión.","soundOn":"Sonido: activado","soundOff":"Sonido: desactivado","volume":"Volumen","resultUnsaved":"No se pudo guardar el resultado en este dispositivo. Si cierras esta pantalla, podría perderse."},"pt-BR":{"gameTitle":"Seu Segundo","language":"Idioma","bestNone":"Menor erro total: ainda sem recorde","bestScore":"Menor erro total: {score} s","playerName":"Nome no ranking: {name}","stats":"Jogadores: {players} / Partidas: {plays}","lastResult":"Último resultado: {result}","intro":"O relógio fica visível nos primeiros 3 segundos. Depois, use sua noção de tempo para tocar uma vez em cada um dos 3 tempos-alvo. Quanto menor o erro total, melhor.","localNotice":"Seu recorde fica salvo neste navegador. Limpar os dados do navegador pode apagá-lo. Ele não é transferido para outro dispositivo.","start":"Começar partida","shareX":"Compartilhar no X","ranking":"Ranking","otherGames":"Jogar outros jogos","preparing":"Prepare-se","retire":"Desistir","targets":"Tempos-alvo","resultsAria":"Resultados dos toques","attempt":"Toque {n}","seconds":"{value} s","tap":"Toque aqui","result":"Resultado: {result}","clear":"Concluído","timeout":"Tempo esgotado","bestUpdated":"Novo recorde!","bestRanking":"Ranking dos melhores resultados","firstRanking":"Ranking da primeira tentativa","retry":"Jogar de novo","finish":"Voltar ao início","nameTitle":"Digite um nome","nameDescription":"Digite um nome de até 20 caracteres para o ranking.","namePlaceholder":"Nome","nameStart":"Começar com este nome","back":"Voltar","nameRequired":"Digite um nome.","nameTooLong":"Use no máximo 20 caracteres.","copyHeading":"Copiar o texto para compartilhar","copyHelp":"Se o X não abrir, copie o texto e a URL para criar sua publicação.","copyTextAria":"Texto e URL para compartilhar","copy":"Copiar","close":"Fechar","copied":"Copiado. Revise e publique sua mensagem no X.","copyManual":"Selecione o texto e copie manualmente.","clipboardCopied":"Copiado para a área de transferência","copyFailed":"Não foi possível copiar","go":"Já","measuring":"Medindo {count} / {total}","feelTime":"Confie na sua\nnoção de tempo","ended":"Terminou","measurementEnded":"Medição concluída!\nPreparando os resultados","senseExact":"Quase exato","senseSlow":"Sua noção de tempo está um pouco lenta","senseFast":"Sua noção de tempo está um pouco rápida","tapCount":"Toques: {count} / {total}","elapsedTaps":"Tempo: {seconds} s / Toques: {count} / {total}","finalScore":"Erro total final: {score} s","finalState":"Resultado final: {result}","rowTarget":"Alvo {n}: {seconds} s","rowTap":"Toque: {value}","rowDiff":"Erro: {value}","noTap":"Sem toque","none":"Nenhum","senseOne":"Seu segundo percebido: {seconds} s","senseDrift":"Desvio por segundo: {seconds} s","senseAverage":"Erro médio: {seconds} s / {label}","shareDescription":"Observe o relógio por 3 segundos e acerte os tempos-alvo usando sua noção de tempo.","shareResultTitle":"{game} — Resultado","shareTargets":"Alvos: {targets}","shareTaps":"Toques: {taps}","elapsed":"Tempo decorrido: {seconds} s","rankingUnavailable":"O ranking está indisponível. Seu resultado continua na tela.","rankingSending":"Enviando resultado…","rankingSendFailed":"Não foi possível enviar o resultado. Ele continua na tela.","rankingLoading":"Carregando o ranking…","rankingSent":"Resultado enviado","rankingLoaded":"Ranking carregado","rankingLoadFailed":"Não foi possível carregar o ranking. Seu resultado continua na tela.","unnamed":"Sem nome","noRecords":"Ainda não há registros","rank":"Posição {rank}","rankingScore":"{score} s","rankingScorePlays":"{score} s / {plays} partidas","nameDisclosure":"Se informar um nome, seu nome e sua pontuação ficarão públicos no ranking. Você pode jogar deixando o campo vazio.","retrySend":"Tentar enviar novamente","retryRanking":"Recarregar ranking","guestResult":"Você jogou sem nome. Esta pontuação não será publicada.","notSubmitted":"Esta partida não foi concluída. A pontuação não será enviada.","scorePending":"Sua pontuação está pendente. O mesmo resultado será reenviado quando a conexão voltar.","soundOn":"Som: ligado","soundOff":"Som: desligado","volume":"Volume","resultUnsaved":"Não foi possível salvar o resultado neste dispositivo. Ele pode ser perdido ao fechar esta tela."},"zh-Hans":{"gameTitle":"你的一秒","language":"语言","bestNone":"最佳总误差：暂无记录","bestScore":"最佳总误差：{score}秒","playerName":"排行榜名称：{name}","stats":"玩家人数：{players} / 游戏次数：{plays}","lastResult":"上次结果：{result}","intro":"计时器只显示最初3秒。之后凭时间感，在3个目标时间点各按一次按钮。总误差越小，成绩越好。","localNotice":"最佳成绩保存在此浏览器中。清除浏览器数据可能会丢失记录，且不会同步到其他设备。","start":"开始游戏","shareX":"分享到X","ranking":"排行榜","otherGames":"玩其他游戏","preparing":"准备中","retire":"退出本局","targets":"目标时间","resultsAria":"点击结果","attempt":"第{n}次","seconds":"{value}秒","tap":"在此点击","result":"结果：{result}","clear":"完成","timeout":"时间到","bestUpdated":"刷新最佳成绩！","bestRanking":"最佳成绩榜","firstRanking":"首次成绩榜","retry":"再玩一次","finish":"返回主页","nameTitle":"输入名称","nameDescription":"请输入排行榜使用的名称，最多20个字符。","namePlaceholder":"名称","nameStart":"使用此名称开始","back":"返回","nameRequired":"请输入名称。","nameTooLong":"名称不能超过20个字符。","copyHeading":"复制分享内容","copyHelp":"如果无法打开X，可以复制文字和链接后自行发布。","copyTextAria":"要分享的文字和链接","copy":"复制","close":"关闭","copied":"已复制。请在X确认并发布。","copyManual":"请选中文字并手动复制。","clipboardCopied":"已复制到剪贴板","copyFailed":"复制失败","go":"开始","measuring":"计时中 {count} / {total}","feelTime":"凭感觉\n点击按钮","ended":"结束","measurementEnded":"计时结束！\n正在准备结果","senseExact":"几乎准确","senseSlow":"你的时间感略慢","senseFast":"你的时间感略快","tapCount":"点击次数：{count} / {total}","elapsedTaps":"经过时间：{seconds}秒 / 点击次数：{count} / {total}","finalScore":"最终总误差：{score}秒","finalState":"最终结果：{result}","rowTarget":"目标{n}：{seconds}秒","rowTap":"点击：{value}","rowDiff":"误差：{value}","noTap":"未点击","none":"无","senseOne":"你感觉的一秒：{seconds}秒","senseDrift":"每秒偏差：{seconds}秒","senseAverage":"平均误差：{seconds}秒 / {label}","shareDescription":"观察前3秒的计时器，然后凭感觉在目标时间点击。","shareResultTitle":"{game} — 结果","shareTargets":"目标：{targets}","shareTaps":"点击：{taps}","elapsed":"经过时间：{seconds}秒","rankingUnavailable":"排行榜暂时不可用。本次结果仍保留在屏幕上。","rankingSending":"正在提交成绩…","rankingSendFailed":"成绩提交失败。本次结果仍保留在屏幕上。","rankingLoading":"正在加载排行榜…","rankingSent":"成绩已提交","rankingLoaded":"排行榜已加载","rankingLoadFailed":"排行榜加载失败。本次结果仍保留在屏幕上。","unnamed":"未命名","noRecords":"暂无记录","rank":"第{rank}名","rankingScore":"{score}秒","rankingScorePlays":"{score}秒 / {plays}次","nameDisclosure":"输入名称后，你的名称和成绩将显示在公开排行榜中。也可以留空游玩。","retrySend":"重试提交成绩","retryRanking":"重新加载排行榜","guestResult":"本局未填写名称，不会公开成绩。","notSubmitted":"本局未完成，不会提交成绩。","scorePending":"成绩等待提交。网络恢复后将重试提交同一结果。","soundOn":"音效：开","soundOff":"音效：关","volume":"音量","resultUnsaved":"无法在此设备上保存结果。关闭此画面可能会丢失结果。"},"fr":{"gameTitle":"Votre seconde","language":"Langue","bestNone":"Meilleur écart total : aucun record","bestScore":"Meilleur écart total : {score} s","playerName":"Nom au classement : {name}","stats":"Joueurs : {players} / Parties : {plays}","lastResult":"Dernier résultat : {result}","intro":"L'horloge reste visible pendant les 3 premières secondes. Fiez-vous ensuite à votre perception du temps pour toucher une fois à chacun des 3 instants cibles. Plus l'écart total est faible, mieux c'est.","localNotice":"Votre record est enregistré dans ce navigateur. Effacer ses données peut le supprimer. Il n'est pas transféré sur un autre appareil.","start":"Commencer la partie","shareX":"Partager sur X","ranking":"Classement","otherGames":"Jouer à d'autres jeux","preparing":"Préparez-vous","retire":"Abandonner","targets":"Instants cibles","resultsAria":"Résultats des appuis","attempt":"Appui {n}","seconds":"{value} s","tap":"Touchez ici","result":"Résultat : {result}","clear":"Terminé","timeout":"Temps écoulé","bestUpdated":"Nouveau record !","bestRanking":"Classement des meilleurs résultats","firstRanking":"Classement du premier essai","retry":"Rejouer","finish":"Retour à l'accueil","nameTitle":"Saisissez un nom","nameDescription":"Saisissez un nom de 20 caractères maximum pour le classement.","namePlaceholder":"Nom","nameStart":"Commencer avec ce nom","back":"Retour","nameRequired":"Veuillez saisir un nom.","nameTooLong":"Utilisez 20 caractères maximum.","copyHeading":"Copier le texte à partager","copyHelp":"Si X ne s'ouvre pas, copiez le texte et l'URL pour créer votre publication.","copyTextAria":"Texte et URL à partager","copy":"Copier","close":"Fermer","copied":"Copié. Vérifiez puis publiez votre message sur X.","copyManual":"Sélectionnez le texte et copiez-le manuellement.","clipboardCopied":"Copié dans le presse-papiers","copyFailed":"Impossible de copier","go":"Partez","measuring":"Mesure {count} / {total}","feelTime":"Fiez-vous à votre\nperception du temps","ended":"Terminé","measurementEnded":"Mesure terminée !\nPréparation des résultats","senseExact":"Presque exact","senseSlow":"Votre perception du temps est un peu lente","senseFast":"Votre perception du temps est un peu rapide","tapCount":"Appuis : {count} / {total}","elapsedTaps":"Temps : {seconds} s / Appuis : {count} / {total}","finalScore":"Écart total final : {score} s","finalState":"Résultat final : {result}","rowTarget":"Cible {n} : {seconds} s","rowTap":"Appui : {value}","rowDiff":"Écart : {value}","noTap":"Aucun appui","none":"Aucun","senseOne":"Votre seconde perçue : {seconds} s","senseDrift":"Décalage par seconde : {seconds} s","senseAverage":"Écart moyen : {seconds} s / {label}","shareDescription":"Observez l'horloge pendant 3 secondes, puis atteignez les instants cibles au ressenti.","shareResultTitle":"{game} — Résultat","shareTargets":"Cibles : {targets}","shareTaps":"Appuis : {taps}","elapsed":"Temps écoulé : {seconds} s","rankingUnavailable":"Le classement est indisponible. Votre résultat reste à l'écran.","rankingSending":"Envoi du résultat…","rankingSendFailed":"Impossible d'envoyer le résultat. Il reste à l'écran.","rankingLoading":"Chargement du classement…","rankingSent":"Résultat envoyé","rankingLoaded":"Classement chargé","rankingLoadFailed":"Impossible de charger le classement. Votre résultat reste à l'écran.","unnamed":"Sans nom","noRecords":"Aucun résultat pour le moment","rank":"Rang {rank}","rankingScore":"{score} s","rankingScorePlays":"{score} s / {plays} parties","nameDisclosure":"Si vous saisissez un nom, votre nom et votre score seront publics dans le classement. Vous pouvez jouer en laissant ce champ vide.","retrySend":"Réessayer l’envoi","retryRanking":"Recharger le classement","guestResult":"Vous avez joué sans nom. Ce score ne sera pas publié.","notSubmitted":"Cette partie n’a pas été terminée. Aucun score ne sera envoyé.","scorePending":"Votre score est en attente. Le même résultat sera renvoyé au retour de la connexion.","soundOn":"Son : activé","soundOff":"Son : désactivé","volume":"Volume","resultUnsaved":"Le résultat n’a pas pu être enregistré sur cet appareil. Fermer cet écran risque de le perdre."},"de":{"gameTitle":"Deine Sekunde","language":"Sprache","bestNone":"Beste Gesamtabweichung: noch kein Ergebnis","bestScore":"Beste Gesamtabweichung: {score} s","playerName":"Name in der Rangliste: {name}","stats":"Spieler: {players} / Runden: {plays}","lastResult":"Letztes Ergebnis: {result}","intro":"Die Uhr ist in den ersten 3 Sekunden sichtbar. Tippe danach nach deinem Zeitgefühl einmal zu jedem der 3 Zielzeitpunkte. Je kleiner die Gesamtabweichung, desto besser.","localNotice":"Deine Bestleistung wird in diesem Browser gespeichert. Beim Löschen der Browserdaten kann sie verloren gehen. Sie wird nicht auf andere Geräte übertragen.","start":"Spiel starten","shareX":"Auf X teilen","ranking":"Rangliste","otherGames":"Andere Spiele spielen","preparing":"Mach dich bereit","retire":"Aufgeben","targets":"Zielzeitpunkte","resultsAria":"Ergebnisse der Eingaben","attempt":"Eingabe {n}","seconds":"{value} s","tap":"Hier tippen","result":"Ergebnis: {result}","clear":"Abgeschlossen","timeout":"Zeit abgelaufen","bestUpdated":"Neue Bestleistung!","bestRanking":"Rangliste der Bestleistungen","firstRanking":"Rangliste der ersten Versuche","retry":"Erneut spielen","finish":"Zur Startseite","nameTitle":"Namen eingeben","nameDescription":"Gib einen Namen mit höchstens 20 Zeichen für die Rangliste ein.","namePlaceholder":"Name","nameStart":"Mit diesem Namen starten","back":"Zurück","nameRequired":"Bitte gib einen Namen ein.","nameTooLong":"Verwende höchstens 20 Zeichen.","copyHeading":"Text zum Teilen kopieren","copyHelp":"Wenn X nicht geöffnet wird, kopiere den Text und die URL für deinen Beitrag.","copyTextAria":"Text und URL zum Teilen","copy":"Kopieren","close":"Schließen","copied":"Kopiert. Prüfe und veröffentliche deinen Beitrag auf X.","copyManual":"Markiere den Text und kopiere ihn manuell.","clipboardCopied":"In die Zwischenablage kopiert","copyFailed":"Kopieren fehlgeschlagen","go":"Los","measuring":"Zeitmessung {count} / {total}","feelTime":"Vertraue deinem\nZeitgefühl","ended":"Beendet","measurementEnded":"Zeitmessung beendet!\nErgebnisse werden vorbereitet","senseExact":"Fast genau","senseSlow":"Dein Zeitgefühl läuft etwas langsam","senseFast":"Dein Zeitgefühl läuft etwas schnell","tapCount":"Eingaben: {count} / {total}","elapsedTaps":"Vergangen: {seconds} s / Eingaben: {count} / {total}","finalScore":"Endgültige Gesamtabweichung: {score} s","finalState":"Endergebnis: {result}","rowTarget":"Ziel {n}: {seconds} s","rowTap":"Eingabe: {value}","rowDiff":"Abweichung: {value}","noTap":"Keine Eingabe","none":"Keine","senseOne":"Deine gefühlte Sekunde: {seconds} s","senseDrift":"Abweichung pro Sekunde: {seconds} s","senseAverage":"Mittlere Abweichung: {seconds} s / {label}","shareDescription":"Beobachte die Uhr 3 Sekunden lang und triff danach die Zielzeitpunkte nach Gefühl.","shareResultTitle":"{game} — Ergebnis","shareTargets":"Ziele: {targets}","shareTaps":"Eingaben: {taps}","elapsed":"Vergangene Zeit: {seconds} s","rankingUnavailable":"Die Rangliste ist derzeit nicht verfügbar. Dein Ergebnis bleibt sichtbar.","rankingSending":"Ergebnis wird übermittelt…","rankingSendFailed":"Dein Ergebnis konnte nicht übermittelt werden. Es bleibt sichtbar.","rankingLoading":"Rangliste wird geladen…","rankingSent":"Ergebnis übermittelt","rankingLoaded":"Rangliste geladen","rankingLoadFailed":"Die Rangliste konnte nicht geladen werden. Dein Ergebnis bleibt sichtbar.","unnamed":"Ohne Namen","noRecords":"Noch keine Ergebnisse","rank":"Platz {rank}","rankingScore":"{score} s","rankingScorePlays":"{score} s / {plays} Runden","nameDisclosure":"Wenn du einen Namen eingibst, werden dein Name und dein Ergebnis in der Rangliste veröffentlicht. Du kannst das Feld leer lassen.","retrySend":"Ergebnis erneut senden","retryRanking":"Rangliste neu laden","guestResult":"Du hast ohne Namen gespielt. Dieses Ergebnis wird nicht veröffentlicht.","notSubmitted":"Diese Runde wurde nicht abgeschlossen. Es wird kein Ergebnis gesendet.","scorePending":"Dein Ergebnis wartet auf die Übertragung. Bei erneuter Verbindung wird dasselbe Ergebnis nochmals gesendet.","soundOn":"Ton: an","soundOff":"Ton: aus","volume":"Lautstärke","resultUnsaved":"Dein Ergebnis konnte auf diesem Gerät nicht gespeichert werden. Wenn du diesen Bildschirm schließt, kann es verloren gehen."},"ko":{"gameTitle":"당신의 1초는?","language":"언어","bestNone":"최고 기록(총 오차): 아직 없음","bestScore":"최고 기록(총 오차): {score}초","playerName":"랭킹 이름: {name}","stats":"참가자: {players}명 / 플레이 횟수: {plays}회","lastResult":"이전: {result}","intro":"처음 3초 동안만 시계가 보입니다. 그 뒤에는 감각으로 제시된 시간에 맞춰 버튼을 3번 누르세요. 총 오차가 작을수록 좋은 기록입니다.","localNotice":"최고 기록은 이 브라우저에 저장됩니다. 저장 데이터를 지우면 사라질 수 있으며 다른 기기로 이어지지 않습니다.","start":"게임 시작","shareX":"X에 공유","ranking":"랭킹","otherGames":"다른 게임 하기","preparing":"준비 중","retire":"그만두기","targets":"목표 시간","resultsAria":"탭 결과","attempt":"{n}번째","seconds":"{value}초","tap":"여기를 누르세요","result":"결과: {result}","clear":"클리어","timeout":"시간 초과","bestUpdated":"최고 기록 갱신!","bestRanking":"최고 기록 랭킹","firstRanking":"첫 도전 랭킹","retry":"다시 플레이","finish":"게임 종료","nameTitle":"이름 입력","nameDescription":"랭킹에 사용할 이름을 20자 이내로 입력해 주세요.","namePlaceholder":"이름","nameStart":"이 이름으로 시작","back":"뒤로","nameRequired":"이름을 입력해 주세요","nameTooLong":"이름은 20자 이내로 입력해 주세요","copyHeading":"공유 문구 복사","copyHelp":"X를 열 수 없으면 본문과 URL을 복사하여 게시할 수 있습니다.","copyTextAria":"공유할 본문과 URL","copy":"복사","close":"닫기","copied":"복사했습니다. X에서 게시 내용을 확인해 주세요.","copyManual":"본문을 선택하여 직접 복사해 주세요.","clipboardCopied":"클립보드에 복사했습니다","copyFailed":"복사하지 못했습니다","go":"시작","measuring":"측정 중 {count} / {total}","feelTime":"감각으로\n눌러 주세요","ended":"종료","measurementEnded":"측정 종료!\n결과를 확인합니다","senseExact":"거의 정확함","senseSlow":"실제보다 조금 느림","senseFast":"실제보다 조금 빠름","tapCount":"탭 횟수: {count}회 / {total}회","elapsedTaps":"경과 시간: {seconds}초 / 탭 횟수: {count}회 / {total}회","finalScore":"최종 점수: {score}초","finalState":"최종 결과: {result}","rowTarget":"목표 {n}: {seconds}초","rowTap":"탭: {value}","rowDiff":"차이: {value}","noTap":"누르지 않음","none":"없음","senseOne":"당신이 느끼는 1초: {seconds}초","senseDrift":"1초당 오차: {seconds}초","senseAverage":"평균 오차: {seconds}초 / {label}","shareDescription":"처음 3초만 시계를 보고 그 뒤에는 감각으로 시간을 맞추는 게임입니다.","shareResultTitle":"{game} 결과","shareTargets":"목표: {targets}","shareTaps":"탭: {taps}","elapsed":"경과 시간: {seconds}초","rankingUnavailable":"현재 랭킹을 이용할 수 없습니다. 이번 결과는 화면에 남아 있습니다.","rankingSending":"랭킹으로 전송하는 중…","rankingSendFailed":"랭킹 전송에 실패했습니다. 이번 결과는 화면에 남아 있습니다.","rankingLoading":"랭킹을 불러오는 중…","rankingSent":"랭킹에 반영했습니다","rankingLoaded":"랭킹을 불러왔습니다","rankingLoadFailed":"랭킹을 불러오지 못했습니다. 결과 화면은 그대로 유지됩니다.","unnamed":"이름 없음","noRecords":"아직 기록이 없습니다","rank":"{rank}위","rankingScore":"{score}초","rankingScorePlays":"{score}초 / {plays}회","nameDisclosure":"이름을 입력하면 이름과 기록이 순위표에 공개됩니다. 비워 두어도 플레이할 수 있습니다.","retrySend":"기록 전송 다시 시도","retryRanking":"순위표 새로고침","guestResult":"이름 없이 플레이했습니다. 이 기록은 공개하지 않습니다.","notSubmitted":"이번 플레이는 완료되지 않아 기록을 전송하지 않습니다.","scorePending":"기록이 전송 대기 중입니다. 연결이 복구되면 같은 결과를 다시 전송합니다.","soundOn":"효과음: 켜짐","soundOff":"효과음: 꺼짐","volume":"음량","resultUnsaved":"이 기기에 결과를 저장하지 못했습니다. 이 화면을 닫으면 결과가 사라질 수 있습니다."},"ru":{"gameTitle":"Ваша секунда","language":"Язык","bestNone":"Лучший результат (суммарная ошибка): пока нет","bestScore":"Лучший результат (суммарная ошибка): {score} с","playerName":"Имя в таблице: {name}","stats":"Участников: {players} / Игр: {plays}","lastResult":"Предыдущий: {result}","intro":"Часы видны только первые 3 секунды. Затем доверьтесь чувству времени и нажмите кнопку 3 раза в заданные моменты. Чем меньше суммарная ошибка, тем лучше результат.","localNotice":"Лучший результат сохраняется в этом браузере. Очистка данных может его удалить; на другое устройство он не переносится.","start":"Начать игру","shareX":"Поделиться в X","ranking":"Таблица лидеров","otherGames":"Другие игры","preparing":"Подготовка","retire":"Прекратить игру","targets":"Целевые моменты","resultsAria":"Результаты нажатий","attempt":"Попытка {n}","seconds":"{value} с","tap":"Нажмите здесь","result":"Результат: {result}","clear":"Пройдено","timeout":"Время вышло","bestUpdated":"Новый рекорд!","bestRanking":"Лучшие результаты","firstRanking":"Первые попытки","retry":"Играть ещё раз","finish":"Завершить игру","nameTitle":"Введите имя","nameDescription":"Введите имя для таблицы лидеров: не более 20 символов.","namePlaceholder":"Имя","nameStart":"Начать с этим именем","back":"Назад","nameRequired":"Введите имя","nameTooLong":"Имя должно быть не длиннее 20 символов","copyHeading":"Скопировать текст для публикации","copyHelp":"Если X не открывается, скопируйте текст и ссылку и опубликуйте их самостоятельно.","copyTextAria":"Текст и ссылка для публикации","copy":"Копировать","close":"Закрыть","copied":"Скопировано. Проверьте публикацию в X.","copyManual":"Выделите текст и скопируйте его вручную.","clipboardCopied":"Скопировано в буфер обмена","copyFailed":"Не удалось скопировать","go":"Старт","measuring":"Идёт измерение {count} / {total}","feelTime":"Нажимайте по\nсвоему чувству времени","ended":"Конец","measurementEnded":"Измерение завершено!\nПоказываем результат","senseExact":"Почти точно","senseSlow":"Чуть медленнее реального времени","senseFast":"Чуть быстрее реального времени","tapCount":"Нажатий: {count} / {total}","elapsedTaps":"Прошло: {seconds} с / Нажатий: {count} / {total}","finalScore":"Итоговый результат: {score} с","finalState":"Итог: {result}","rowTarget":"Цель {n}: {seconds} с","rowTap":"Нажатие: {value}","rowDiff":"Разница: {value}","noTap":"Нет нажатия","none":"Нет","senseOne":"Ваша секунда: {seconds} с","senseDrift":"Отклонение на секунду: {seconds} с","senseAverage":"Среднее отклонение: {seconds} с / {label}","shareDescription":"Смотрите на часы первые 3 секунды, затем угадывайте время по своим ощущениям.","shareResultTitle":"{game}: результат","shareTargets":"Цели: {targets}","shareTaps":"Нажатия: {taps}","elapsed":"Прошло: {seconds} с","rankingUnavailable":"Таблица лидеров сейчас недоступна. Ваш результат остаётся на экране.","rankingSending":"Отправка в таблицу лидеров…","rankingSendFailed":"Не удалось отправить результат. Он остаётся на экране.","rankingLoading":"Загрузка таблицы лидеров…","rankingSent":"Результат добавлен в таблицу","rankingLoaded":"Таблица лидеров загружена","rankingLoadFailed":"Не удалось загрузить таблицу. Экран результата остаётся открытым.","unnamed":"Без имени","noRecords":"Пока нет результатов","rank":"Место {rank}","rankingScore":"{score} с","rankingScorePlays":"{score} с / {plays} игр","nameDisclosure":"Если указать имя, ваше имя и результат будут опубликованы в рейтинге. Можно играть, оставив поле пустым.","retrySend":"Повторить отправку","retryRanking":"Обновить рейтинг","guestResult":"Вы играли без имени. Этот результат не будет опубликован.","notSubmitted":"Игра не завершена. Результат не будет отправлен.","scorePending":"Результат ожидает отправки. После восстановления связи будет повторно отправлен тот же результат.","soundOn":"Звук: вкл.","soundOff":"Звук: выкл.","volume":"Громкость","resultUnsaved":"Не удалось сохранить результат на этом устройстве. Если закрыть этот экран, результат может быть потерян."},"it":{"gameTitle":"Il tuo secondo","language":"Lingua","bestNone":"Miglior errore totale: nessun record","bestScore":"Miglior errore totale: {score} s","playerName":"Nome in classifica: {name}","stats":"Giocatori: {players} / Partite: {plays}","lastResult":"Ultimo risultato: {result}","intro":"L'orologio è visibile per i primi 3 secondi. Poi usa il tuo senso del tempo per toccare una volta a ciascuno dei 3 tempi obiettivo. Più basso è l'errore totale, meglio è.","localNotice":"Il tuo record viene salvato in questo browser. Cancellare i dati del browser potrebbe eliminarlo. Non viene trasferito su altri dispositivi.","start":"Inizia partita","shareX":"Condividi su X","ranking":"Classifica","otherGames":"Gioca ad altri giochi","preparing":"Preparati","retire":"Abbandona","targets":"Tempi obiettivo","resultsAria":"Risultati dei tocchi","attempt":"Tocco {n}","seconds":"{value} s","tap":"Tocca qui","result":"Risultato: {result}","clear":"Completato","timeout":"Tempo scaduto","bestUpdated":"Nuovo record!","bestRanking":"Classifica dei migliori risultati","firstRanking":"Classifica del primo tentativo","retry":"Gioca di nuovo","finish":"Torna alla home","nameTitle":"Inserisci un nome","nameDescription":"Inserisci un nome di massimo 20 caratteri per la classifica.","namePlaceholder":"Nome","nameStart":"Inizia con questo nome","back":"Indietro","nameRequired":"Inserisci un nome.","nameTooLong":"Usa al massimo 20 caratteri.","copyHeading":"Copia il testo da condividere","copyHelp":"Se X non si apre, copia il testo e l'URL per creare il tuo post.","copyTextAria":"Testo e URL da condividere","copy":"Copia","close":"Chiudi","copied":"Copiato. Controlla e pubblica il tuo post su X.","copyManual":"Seleziona il testo e copialo manualmente.","clipboardCopied":"Copiato negli appunti","copyFailed":"Impossibile copiare","go":"Via","measuring":"Misurazione {count} / {total}","feelTime":"Fidati del tuo\nsenso del tempo","ended":"Finito","measurementEnded":"Misurazione terminata!\nPreparazione dei risultati","senseExact":"Quasi esatto","senseSlow":"Il tuo senso del tempo è un po' lento","senseFast":"Il tuo senso del tempo è un po' veloce","tapCount":"Tocchi: {count} / {total}","elapsedTaps":"Tempo: {seconds} s / Tocchi: {count} / {total}","finalScore":"Errore totale finale: {score} s","finalState":"Risultato finale: {result}","rowTarget":"Obiettivo {n}: {seconds} s","rowTap":"Tocco: {value}","rowDiff":"Errore: {value}","noTap":"Nessun tocco","none":"Nessuno","senseOne":"Il tuo secondo percepito: {seconds} s","senseDrift":"Scarto per secondo: {seconds} s","senseAverage":"Errore medio: {seconds} s / {label}","shareDescription":"Guarda l'orologio per 3 secondi, poi raggiungi i tempi obiettivo affidandoti al tuo senso del tempo.","shareResultTitle":"{game} — Risultato","shareTargets":"Obiettivi: {targets}","shareTaps":"Tocchi: {taps}","elapsed":"Tempo trascorso: {seconds} s","rankingUnavailable":"La classifica non è disponibile. Il tuo risultato resta sullo schermo.","rankingSending":"Invio del risultato…","rankingSendFailed":"Impossibile inviare il risultato. Resta sullo schermo.","rankingLoading":"Caricamento della classifica…","rankingSent":"Risultato inviato","rankingLoaded":"Classifica caricata","rankingLoadFailed":"Impossibile caricare la classifica. Il tuo risultato resta sullo schermo.","unnamed":"Senza nome","noRecords":"Nessun risultato per ora","rank":"Posizione {rank}","rankingScore":"{score} s","rankingScorePlays":"{score} s / {plays} partite","nameDisclosure":"Se inserisci un nome, il tuo nome e il tuo risultato saranno pubblici in classifica. Puoi giocare lasciando il campo vuoto.","retrySend":"Riprova l’invio","retryRanking":"Ricarica la classifica","guestResult":"Hai giocato senza nome. Questo risultato non sarà pubblicato.","notSubmitted":"Questa partita non è stata completata. Il risultato non sarà inviato.","scorePending":"Il risultato è in attesa. Lo stesso risultato sarà reinviato quando torna la connessione.","soundOn":"Audio: attivo","soundOff":"Audio: disattivato","volume":"Volume","resultUnsaved":"Impossibile salvare il risultato su questo dispositivo. Chiudendo questa schermata potresti perderlo."},"zh-Hant":{"gameTitle":"你的一秒","language":"語言","bestNone":"最佳總誤差：暫無紀錄","bestScore":"最佳總誤差：{score}秒","playerName":"排行榜名稱：{name}","stats":"玩家人數：{players} / 遊玩次數：{plays}","lastResult":"上次結果：{result}","intro":"計時器只顯示最初3秒。之後憑時間感，在3個目標時間點各按一次按鈕。總誤差越小，成績越好。","localNotice":"最佳成績儲存在此瀏覽器中。清除瀏覽器資料可能會遺失紀錄，且不會同步到其他裝置。","start":"開始遊戲","shareX":"分享到X","ranking":"排行榜","otherGames":"玩其他遊戲","preparing":"準備中","retire":"退出本局","targets":"目標時間","resultsAria":"點擊結果","attempt":"第{n}次","seconds":"{value}秒","tap":"在此點擊","result":"結果：{result}","clear":"完成","timeout":"時間到","bestUpdated":"刷新最佳成績！","bestRanking":"最佳成績榜","firstRanking":"首次成績榜","retry":"再玩一次","finish":"返回首頁","nameTitle":"輸入名稱","nameDescription":"請輸入排行榜使用的名稱，最多20個字元。","namePlaceholder":"名稱","nameStart":"使用此名稱開始","back":"返回","nameRequired":"請輸入名稱。","nameTooLong":"名稱不能超過20個字元。","copyHeading":"複製分享內容","copyHelp":"如果無法開啟X，可以複製文字和連結後自行發文。","copyTextAria":"要分享的文字和連結","copy":"複製","close":"關閉","copied":"已複製。請在X確認並發文。","copyManual":"請選取文字並手動複製。","clipboardCopied":"已複製到剪貼簿","copyFailed":"複製失敗","go":"開始","measuring":"計時中 {count} / {total}","feelTime":"憑感覺\n點擊按鈕","ended":"結束","measurementEnded":"計時結束！\n正在準備結果","senseExact":"幾乎準確","senseSlow":"你的時間感略慢","senseFast":"你的時間感略快","tapCount":"點擊次數：{count} / {total}","elapsedTaps":"經過時間：{seconds}秒 / 點擊次數：{count} / {total}","finalScore":"最終總誤差：{score}秒","finalState":"最終結果：{result}","rowTarget":"目標{n}：{seconds}秒","rowTap":"點擊：{value}","rowDiff":"誤差：{value}","noTap":"未點擊","none":"無","senseOne":"你感覺的一秒：{seconds}秒","senseDrift":"每秒偏差：{seconds}秒","senseAverage":"平均誤差：{seconds}秒 / {label}","shareDescription":"觀察前3秒的計時器，然後憑感覺在目標時間點擊。","shareResultTitle":"{game} — 結果","shareTargets":"目標：{targets}","shareTaps":"點擊：{taps}","elapsed":"經過時間：{seconds}秒","rankingUnavailable":"排行榜暫時無法使用。本次結果仍保留在畫面上。","rankingSending":"正在提交成績…","rankingSendFailed":"成績提交失敗。本次結果仍保留在畫面上。","rankingLoading":"正在載入排行榜…","rankingSent":"成績已提交","rankingLoaded":"排行榜已載入","rankingLoadFailed":"排行榜載入失敗。本次結果仍保留在畫面上。","unnamed":"未命名","noRecords":"暫無紀錄","rank":"第{rank}名","rankingScore":"{score}秒","rankingScorePlays":"{score}秒 / {plays}次","nameDisclosure":"輸入名稱後，你的名稱和成績將顯示在公開排行榜中。也可以留空遊玩。","retrySend":"重試提交成績","retryRanking":"重新載入排行榜","guestResult":"本局未填寫名稱，不會公開成績。","notSubmitted":"本局未完成，不會提交成績。","scorePending":"成績等待提交。網路恢復後將重試提交同一結果。","soundOn":"音效：開","soundOff":"音效：關","volume":"音量","resultUnsaved":"無法在此裝置上儲存結果。關閉此畫面可能會遺失結果。"},"id":{"gameTitle":"Satu Detik Menurutmu","language":"Bahasa","bestNone":"Skor terbaik (total selisih): belum ada","bestScore":"Skor terbaik (total selisih): {score} detik","playerName":"Nama di papan peringkat: {name}","stats":"Peserta: {players} / Jumlah permainan: {plays}","lastResult":"Sebelumnya: {result}","intro":"Jam hanya terlihat selama 3 detik pertama. Setelah itu, andalkan perasaan waktu Anda untuk menekan tombol 3 kali pada detik yang ditentukan. Semakin kecil total selisihnya, semakin baik hasilnya.","localNotice":"Skor terbaik disimpan di browser ini. Menghapus data dapat menghilangkannya, dan skor tidak diteruskan ke perangkat lain.","start":"Mulai permainan","shareX":"Bagikan di X","ranking":"Papan peringkat","otherGames":"Mainkan game lain","preparing":"Menyiapkan","retire":"Berhenti","targets":"Target waktu","resultsAria":"Hasil ketukan","attempt":"Percobaan ke-{n}","seconds":"{value} detik","tap":"Tekan di sini","result":"Hasil: {result}","clear":"Selesai","timeout":"Waktu habis","bestUpdated":"Rekor baru!","bestRanking":"Peringkat skor terbaik","firstRanking":"Peringkat percobaan pertama","retry":"Main lagi","finish":"Akhiri permainan","nameTitle":"Masukkan nama","nameDescription":"Masukkan nama untuk papan peringkat, maksimal 20 karakter.","namePlaceholder":"Nama","nameStart":"Mulai dengan nama ini","back":"Kembali","nameRequired":"Masukkan nama","nameTooLong":"Nama maksimal 20 karakter","copyHeading":"Salin teks berbagi","copyHelp":"Jika X tidak terbuka, salin teks dan URL untuk diposting sendiri.","copyTextAria":"Teks dan URL untuk dibagikan","copy":"Salin","close":"Tutup","copied":"Disalin. Periksa posting Anda di X.","copyManual":"Pilih teks dan salin secara manual.","clipboardCopied":"Disalin ke papan klip","copyFailed":"Tidak dapat menyalin","go":"Mulai","measuring":"Mengukur {count} / {total}","feelTime":"Tekan berdasarkan\nperasaan waktu Anda","ended":"Berakhir","measurementEnded":"Pengukuran selesai!\nMenampilkan hasil","senseExact":"Hampir tepat","senseSlow":"Sedikit lebih lambat dari waktu sebenarnya","senseFast":"Sedikit lebih cepat dari waktu sebenarnya","tapCount":"Ketukan: {count} / {total}","elapsedTaps":"Waktu berlalu: {seconds} detik / Ketukan: {count} / {total}","finalScore":"Skor akhir: {score} detik","finalState":"Hasil akhir: {result}","rowTarget":"Target {n}: {seconds} detik","rowTap":"Ketukan: {value}","rowDiff":"Selisih: {value}","noTap":"Belum diketuk","none":"Tidak ada","senseOne":"Satu detik menurutmu: {seconds} detik","senseDrift":"Selisih per detik: {seconds} detik","senseAverage":"Rata-rata selisih: {seconds} detik / {label}","shareDescription":"Lihat jam selama 3 detik pertama, lalu tebak waktunya berdasarkan perasaan Anda.","shareResultTitle":"Hasil {game}","shareTargets":"Target: {targets}","shareTaps":"Ketukan: {taps}","elapsed":"Waktu berlalu: {seconds} detik","rankingUnavailable":"Papan peringkat sedang tidak tersedia. Hasil kali ini tetap ada di layar.","rankingSending":"Mengirim ke papan peringkat…","rankingSendFailed":"Gagal mengirim ke papan peringkat. Hasil kali ini tetap ada di layar.","rankingLoading":"Memuat papan peringkat…","rankingSent":"Hasil ditambahkan ke papan peringkat","rankingLoaded":"Papan peringkat dimuat","rankingLoadFailed":"Gagal memuat papan peringkat. Tampilan hasil tetap terbuka.","unnamed":"Tanpa nama","noRecords":"Belum ada catatan","rank":"Peringkat {rank}","rankingScore":"{score} detik","rankingScorePlays":"{score} detik / {plays} kali","nameDisclosure":"Jika mengisi nama, nama dan skor Anda akan dipublikasikan di peringkat. Anda tetap bisa bermain jika kolom ini kosong.","retrySend":"Coba kirim skor lagi","retryRanking":"Muat ulang peringkat","guestResult":"Anda bermain tanpa nama. Skor ini tidak akan dipublikasikan.","notSubmitted":"Permainan ini belum selesai. Skor tidak akan dikirim.","scorePending":"Skor menunggu pengiriman. Hasil yang sama akan dikirim ulang setelah koneksi pulih.","soundOn":"Suara: aktif","soundOff":"Suara: nonaktif","volume":"Volume","resultUnsaved":"Hasil tidak dapat disimpan di perangkat ini. Hasil mungkin hilang jika layar ini ditutup."},"tr":{"gameTitle":"Senin Bir Saniyen","language":"Dil","bestNone":"En iyi skor (toplam sapma): henüz yok","bestScore":"En iyi skor (toplam sapma): {score} sn","playerName":"Sıralamadaki ad: {name}","stats":"Katılımcı: {players} / Oyun sayısı: {plays}","lastResult":"Önceki: {result}","intro":"Saat yalnızca ilk 3 saniye görünür. Sonrasında zaman hissinize güvenerek verilen saniyelere denk gelecek şekilde düğmeye 3 kez basın. Toplam sapma ne kadar küçükse sonuç o kadar iyidir.","localNotice":"En iyi skor bu tarayıcıda saklanır. Kayıtlı verileri silerseniz kaybolabilir; başka bir cihaza aktarılmaz.","start":"Oyunu başlat","shareX":"X'te paylaş","ranking":"Sıralama","otherGames":"Diğer oyunları oyna","preparing":"Hazırlanıyor","retire":"Oyunu bırak","targets":"Hedef süreler","resultsAria":"Dokunma sonuçları","attempt":"{n}. deneme","seconds":"{value} sn","tap":"Buraya bas","result":"Sonuç: {result}","clear":"Tamamlandı","timeout":"Süre doldu","bestUpdated":"Yeni rekor!","bestRanking":"En iyi skor sıralaması","firstRanking":"İlk deneme sıralaması","retry":"Tekrar oyna","finish":"Oyunu bitir","nameTitle":"Adınızı girin","nameDescription":"Sıralamada kullanılacak, en fazla 20 karakterlik bir ad girin.","namePlaceholder":"Ad","nameStart":"Bu adla başla","back":"Geri","nameRequired":"Lütfen bir ad girin","nameTooLong":"Ad en fazla 20 karakter olabilir","copyHeading":"Paylaşım metnini kopyala","copyHelp":"X açılamıyorsa metni ve bağlantıyı kopyalayıp paylaşabilirsiniz.","copyTextAria":"Paylaşılacak metin ve bağlantı","copy":"Kopyala","close":"Kapat","copied":"Kopyalandı. Gönderinizi X'te kontrol edin.","copyManual":"Metni seçip elle kopyalayın.","clipboardCopied":"Panoya kopyalandı","copyFailed":"Kopyalanamadı","go":"Başla","measuring":"Ölçülüyor {count} / {total}","feelTime":"Zaman hissinize göre\nbasın","ended":"Bitti","measurementEnded":"Ölçüm bitti!\nSonuç gösteriliyor","senseExact":"Neredeyse tam","senseSlow":"Gerçek zamandan biraz yavaş","senseFast":"Gerçek zamandan biraz hızlı","tapCount":"Dokunma sayısı: {count} / {total}","elapsedTaps":"Geçen süre: {seconds} sn / Dokunma sayısı: {count} / {total}","finalScore":"Son skor: {score} sn","finalState":"Son sonuç: {result}","rowTarget":"Hedef {n}: {seconds} sn","rowTap":"Dokunma: {value}","rowDiff":"Fark: {value}","noTap":"Dokunulmadı","none":"Yok","senseOne":"Sizin bir saniyeniz: {seconds} sn","senseDrift":"Saniye başına sapma: {seconds} sn","senseAverage":"Ortalama sapma: {seconds} sn / {label}","shareDescription":"Saati yalnızca ilk 3 saniye görüp sonrasında zaman hissinizle süreleri tutturmaya çalışın.","shareResultTitle":"{game} sonucu","shareTargets":"Hedefler: {targets}","shareTaps":"Dokunmalar: {taps}","elapsed":"Geçen süre: {seconds} sn","rankingUnavailable":"Sıralama şu anda kullanılamıyor. Bu oyunun sonucu ekranda kalır.","rankingSending":"Sıralamaya gönderiliyor…","rankingSendFailed":"Sıralamaya gönderilemedi. Bu oyunun sonucu ekranda kalır.","rankingLoading":"Sıralama yükleniyor…","rankingSent":"Sıralamaya eklendi","rankingLoaded":"Sıralama yüklendi","rankingLoadFailed":"Sıralama yüklenemedi. Sonuç ekranı açık kalır.","unnamed":"Adsız","noRecords":"Henüz kayıt yok","rank":"{rank}. sıra","rankingScore":"{score} sn","rankingScorePlays":"{score} sn / {plays} oyun","nameDisclosure":"Bir ad girerseniz adınız ve sonucunuz sıralamada herkese açık olur. Alanı boş bırakarak da oynayabilirsiniz.","retrySend":"Sonucu yeniden gönder","retryRanking":"Sıralamayı yenile","guestResult":"Adsız oynadınız. Bu sonuç yayımlanmayacak.","notSubmitted":"Bu oyun tamamlanmadı. Sonuç gönderilmeyecek.","scorePending":"Sonucunuz gönderilmeyi bekliyor. Bağlantı geri geldiğinde aynı sonuç yeniden gönderilecek.","soundOn":"Ses: açık","soundOff":"Ses: kapalı","volume":"Ses düzeyi","resultUnsaved":"Sonucun bu cihaza kaydedilemedi. Bu ekranı kapatırsan sonuç kaybolabilir."},"vi":{"gameTitle":"Một giây của bạn","language":"Ngôn ngữ","bestNone":"Tổng sai lệch tốt nhất: chưa có","bestScore":"Tổng sai lệch tốt nhất: {score} giây","playerName":"Tên trên bảng xếp hạng: {name}","stats":"Người chơi: {players} / Lượt chơi: {plays}","lastResult":"Kết quả trước: {result}","intro":"Đồng hồ chỉ hiện trong 3 giây đầu. Sau đó, hãy cảm nhận thời gian và chạm một lần tại mỗi mốc trong 3 mốc yêu cầu. Tổng sai lệch càng nhỏ càng tốt.","localNotice":"Kỷ lục được lưu trong trình duyệt này. Xóa dữ liệu trình duyệt có thể làm mất kỷ lục. Dữ liệu không chuyển sang thiết bị khác.","start":"Bắt đầu chơi","shareX":"Chia sẻ lên X","ranking":"Bảng xếp hạng","otherGames":"Chơi trò khác","preparing":"Chuẩn bị","retire":"Bỏ cuộc","targets":"Mốc thời gian","resultsAria":"Kết quả chạm","attempt":"Lần chạm {n}","seconds":"{value} giây","tap":"Chạm tại đây","result":"Kết quả: {result}","clear":"Hoàn thành","timeout":"Hết giờ","bestUpdated":"Kỷ lục mới!","bestRanking":"Xếp hạng thành tích tốt nhất","firstRanking":"Xếp hạng lần chơi đầu","retry":"Chơi lại","finish":"Về trang chủ","nameTitle":"Nhập tên","nameDescription":"Nhập tên dùng trên bảng xếp hạng, tối đa 20 ký tự.","namePlaceholder":"Tên","nameStart":"Bắt đầu với tên này","back":"Quay lại","nameRequired":"Vui lòng nhập tên.","nameTooLong":"Tên không được dài quá 20 ký tự.","copyHeading":"Sao chép nội dung chia sẻ","copyHelp":"Nếu không mở được X, hãy sao chép nội dung và đường dẫn để tự đăng.","copyTextAria":"Nội dung và đường dẫn để chia sẻ","copy":"Sao chép","close":"Đóng","copied":"Đã sao chép. Hãy kiểm tra và đăng trên X.","copyManual":"Hãy chọn nội dung và sao chép thủ công.","clipboardCopied":"Đã sao chép vào bộ nhớ tạm","copyFailed":"Không thể sao chép","go":"Bắt đầu","measuring":"Đang đo {count} / {total}","feelTime":"Cảm nhận thời gian\nrồi chạm","ended":"Kết thúc","measurementEnded":"Đã đo xong!\nĐang chuẩn bị kết quả","senseExact":"Gần như chính xác","senseSlow":"Cảm nhận thời gian của bạn hơi chậm","senseFast":"Cảm nhận thời gian của bạn hơi nhanh","tapCount":"Số lần chạm: {count} / {total}","elapsedTaps":"Thời gian: {seconds} giây / Số lần chạm: {count} / {total}","finalScore":"Tổng sai lệch cuối cùng: {score} giây","finalState":"Kết quả cuối cùng: {result}","rowTarget":"Mốc {n}: {seconds} giây","rowTap":"Chạm: {value}","rowDiff":"Sai lệch: {value}","noTap":"Chưa chạm","none":"Không có","senseOne":"Một giây theo cảm nhận: {seconds} giây","senseDrift":"Độ lệch mỗi giây: {seconds} giây","senseAverage":"Sai lệch trung bình: {seconds} giây / {label}","shareDescription":"Nhìn đồng hồ trong 3 giây, rồi chạm tại các mốc thời gian bằng cảm nhận.","shareResultTitle":"{game} — Kết quả","shareTargets":"Các mốc: {targets}","shareTaps":"Các lần chạm: {taps}","elapsed":"Thời gian: {seconds} giây","rankingUnavailable":"Bảng xếp hạng hiện không khả dụng. Kết quả vẫn được giữ trên màn hình.","rankingSending":"Đang gửi thành tích…","rankingSendFailed":"Không thể gửi thành tích. Kết quả vẫn được giữ trên màn hình.","rankingLoading":"Đang tải bảng xếp hạng…","rankingSent":"Đã gửi thành tích","rankingLoaded":"Đã tải bảng xếp hạng","rankingLoadFailed":"Không thể tải bảng xếp hạng. Kết quả vẫn được giữ trên màn hình.","unnamed":"Chưa đặt tên","noRecords":"Chưa có thành tích","rank":"Hạng {rank}","rankingScore":"{score} giây","rankingScorePlays":"{score} giây / {plays} lượt","nameDisclosure":"Nếu nhập tên, tên và thành tích của bạn sẽ công khai trên bảng xếp hạng. Bạn vẫn có thể chơi khi để trống.","retrySend":"Thử gửi lại thành tích","retryRanking":"Tải lại bảng xếp hạng","guestResult":"Bạn đã chơi không tên. Thành tích này sẽ không công khai.","notSubmitted":"Lượt chơi chưa hoàn thành. Thành tích sẽ không được gửi.","scorePending":"Thành tích đang chờ gửi. Cùng kết quả này sẽ được gửi lại khi có kết nối.","soundOn":"Âm thanh: bật","soundOff":"Âm thanh: tắt","volume":"Âm lượng","resultUnsaved":"Không thể lưu kết quả trên thiết bị này. Kết quả có thể bị mất nếu bạn đóng màn hình này."},"th":{"gameTitle":"หนึ่งวินาทีของคุณ","language":"ภาษา","bestNone":"ผลรวมความคลาดเคลื่อนที่ดีที่สุด: ยังไม่มีสถิติ","bestScore":"ผลรวมความคลาดเคลื่อนที่ดีที่สุด: {score} วินาที","playerName":"ชื่อในอันดับ: {name}","stats":"ผู้เล่น: {players} / จำนวนครั้งที่เล่น: {plays}","lastResult":"ผลครั้งก่อน: {result}","intro":"นาฬิกาจะแสดงเฉพาะ 3 วินาทีแรก จากนั้นใช้ความรู้สึกกะเวลาแล้วแตะหนึ่งครั้งในแต่ละเวลาเป้าหมายทั้ง 3 ค่า ผลรวมความคลาดเคลื่อนยิ่งน้อยยิ่งดี","localNotice":"สถิติที่ดีที่สุดจะบันทึกในเบราว์เซอร์นี้ การล้างข้อมูลเบราว์เซอร์อาจทำให้สถิติหายไป และข้อมูลจะไม่ย้ายไปยังอุปกรณ์อื่น","start":"เริ่มเกม","shareX":"แชร์บน X","ranking":"อันดับ","otherGames":"เล่นเกมอื่น","preparing":"เตรียมพร้อม","retire":"ยอมแพ้","targets":"เวลาเป้าหมาย","resultsAria":"ผลการแตะ","attempt":"ครั้งที่ {n}","seconds":"{value} วินาที","tap":"แตะที่นี่","result":"ผล: {result}","clear":"สำเร็จ","timeout":"หมดเวลา","bestUpdated":"สถิติใหม่!","bestRanking":"อันดับสถิติที่ดีที่สุด","firstRanking":"อันดับการเล่นครั้งแรก","retry":"เล่นอีกครั้ง","finish":"กลับหน้าหลัก","nameTitle":"ใส่ชื่อ","nameDescription":"ใส่ชื่อที่จะใช้ในอันดับ ไม่เกิน 20 ตัวอักษร","namePlaceholder":"ชื่อ","nameStart":"เริ่มด้วยชื่อนี้","back":"กลับ","nameRequired":"กรุณาใส่ชื่อ","nameTooLong":"ชื่อยาวได้ไม่เกิน 20 ตัวอักษร","copyHeading":"คัดลอกข้อความแชร์","copyHelp":"หากเปิด X ไม่ได้ ให้คัดลอกข้อความและลิงก์ไปโพสต์เอง","copyTextAria":"ข้อความและลิงก์ที่จะแชร์","copy":"คัดลอก","close":"ปิด","copied":"คัดลอกแล้ว โปรดตรวจสอบและโพสต์บน X","copyManual":"เลือกข้อความแล้วคัดลอกด้วยตนเอง","clipboardCopied":"คัดลอกไปยังคลิปบอร์ดแล้ว","copyFailed":"คัดลอกไม่ได้","go":"เริ่ม","measuring":"กำลังจับเวลา {count} / {total}","feelTime":"กะเวลา\nแล้วแตะ","ended":"จบ","measurementEnded":"จับเวลาเสร็จแล้ว!\nกำลังเตรียมผล","senseExact":"เกือบตรงพอดี","senseSlow":"คุณรู้สึกว่าเวลาผ่านช้ากว่าจริงเล็กน้อย","senseFast":"คุณรู้สึกว่าเวลาผ่านเร็วกว่าจริงเล็กน้อย","tapCount":"จำนวนครั้งที่แตะ: {count} / {total}","elapsedTaps":"เวลาที่ผ่านไป: {seconds} วินาที / จำนวนครั้งที่แตะ: {count} / {total}","finalScore":"ผลรวมความคลาดเคลื่อน: {score} วินาที","finalState":"ผลสุดท้าย: {result}","rowTarget":"เป้าหมาย {n}: {seconds} วินาที","rowTap":"แตะ: {value}","rowDiff":"ความคลาดเคลื่อน: {value}","noTap":"ยังไม่ได้แตะ","none":"ไม่มี","senseOne":"หนึ่งวินาทีที่คุณรู้สึก: {seconds} วินาที","senseDrift":"ความคลาดเคลื่อนต่อวินาที: {seconds} วินาที","senseAverage":"ความคลาดเคลื่อนเฉลี่ย: {seconds} วินาที / {label}","shareDescription":"ดูนาฬิกา 3 วินาที แล้วใช้ความรู้สึกแตะให้ตรงเวลาเป้าหมาย","shareResultTitle":"{game} — ผล","shareTargets":"เป้าหมาย: {targets}","shareTaps":"การแตะ: {taps}","elapsed":"เวลาที่ผ่านไป: {seconds} วินาที","rankingUnavailable":"ขณะนี้ใช้อันดับไม่ได้ ผลของคุณยังอยู่บนหน้าจอ","rankingSending":"กำลังส่งสถิติ…","rankingSendFailed":"ส่งสถิติไม่ได้ ผลของคุณยังอยู่บนหน้าจอ","rankingLoading":"กำลังโหลดอันดับ…","rankingSent":"ส่งสถิติแล้ว","rankingLoaded":"โหลดอันดับแล้ว","rankingLoadFailed":"โหลดอันดับไม่ได้ ผลของคุณยังอยู่บนหน้าจอ","unnamed":"ไม่มีชื่อ","noRecords":"ยังไม่มีสถิติ","rank":"อันดับ {rank}","rankingScore":"{score} วินาที","rankingScorePlays":"{score} วินาที / {plays} ครั้ง","nameDisclosure":"หากใส่ชื่อ ชื่อและสถิติของคุณจะเผยแพร่ในอันดับ คุณสามารถเว้นว่างแล้วเล่นได้","retrySend":"ลองส่งสถิติอีกครั้ง","retryRanking":"โหลดอันดับใหม่","guestResult":"คุณเล่นโดยไม่ใส่ชื่อ สถิตินี้จะไม่ถูกเผยแพร่","notSubmitted":"การเล่นครั้งนี้ยังไม่สำเร็จ จึงไม่ส่งสถิติ","scorePending":"สถิติรอส่งอยู่ ระบบจะส่งผลเดิมอีกครั้งเมื่อเชื่อมต่อได้","soundOn":"เสียง: เปิด","soundOff":"เสียง: ปิด","volume":"ระดับเสียง","resultUnsaved":"ไม่สามารถบันทึกผลลงในอุปกรณ์นี้ได้ หากปิดหน้าจอนี้ ผลอาจสูญหาย"}}</script>
+<script id="localization">
+(() => {
+  'use strict';
+  const catalogs = JSON.parse(document.getElementById('locale-catalogs').textContent);
+  const languageNames = {ja:'日本語',en:'English',es:'Español','pt-BR':'Português (Brasil)','zh-Hans':'简体中文',fr:'Français',de:'Deutsch',ko:'한국어',ru:'Русский',it:'Italiano','zh-Hant':'繁體中文',id:'Bahasa Indonesia',tr:'Türkçe',vi:'Tiếng Việt',th:'ไทย'};
+  const key = 'anatano_1byou-language';
+  function normalize(value) {
+    const id=String(value||'').replaceAll('_','-').toLowerCase();
+    const exact=Object.keys(catalogs).find(lang=>lang.toLowerCase()===id);
+    if(exact)return exact;
+    if(id==='zh'||id.startsWith('zh-')){const parts=id.split('-');if(parts.includes('hans'))return 'zh-Hans';if(parts.includes('hant'))return 'zh-Hant';return parts.some(p=>['tw','hk','mo'].includes(p))?'zh-Hant':'zh-Hans';}
+    if(id==='pt'||id.startsWith('pt-'))return 'pt-BR';
+    const base=id.split('-')[0];return Object.hasOwn(catalogs,base)?base:null;
+  }
+  let saved=null;try{saved=localStorage.getItem(key);}catch{}
+  let language=normalize(saved)||(navigator.languages||[navigator.language]).map(normalize).find(Boolean)||'en';
+  const t=(name,params={})=>String(catalogs[language]?.[name]??catalogs.en[name]??name).replace(/\{(\w+)\}/g,(whole,id)=>Object.hasOwn(params,id)?String(params[id]):whole);
+  function render() {
+    document.documentElement.lang=language;
+    document.querySelectorAll('[data-i18n]').forEach(element=>{
+      let params={};try{params=JSON.parse(element.dataset.i18nParams||'{}');}catch{}
+      const value=t(element.dataset.i18n,params);
+      if(element.dataset.i18nAttr)element.setAttribute(element.dataset.i18nAttr,value);else element.textContent=value;
+    });
+    const select=document.getElementById('languageSelect');if(select)select.value=language;
+  }
+  function setLanguage(value) {
+    const next=normalize(value)||'en';if(next===language)return;
+    language=next;try{localStorage.setItem(key,language);}catch{}
+    render();window.dispatchEvent(new CustomEvent('gamelanguagechange'));
+  }
+  function text(element,name,params={}) {
+    element.dataset.i18n=name;element.dataset.i18nParams=JSON.stringify(params);element.textContent=t(name,params);
+  }
+  const select=document.getElementById('languageSelect');
+  if(select&&typeof document.createElement==='function'){
+    for(const [value,label] of Object.entries(languageNames)){const option=document.createElement('option');option.value=value;option.textContent=label;select.appendChild(option);}
+    select.addEventListener('change',()=>setLanguage(select.value));
+  }
+  window.gameI18n={t,text,render,setLanguage,normalize,get language(){return language;}};
+  render();
+})();
+</script>
 
-  <div id="toast" class="toast">クリップボードにコピーしました</div>
+<script>
+(() => {
+  'use strict';
+  const dialog = document.getElementById('commonShareFallback');
+  const field = document.getElementById('commonShareText');
+  const status = document.getElementById('commonShareStatus');
+  window.openGameShareX = (text) => {
+    const body = String(text);
+    const intent = new URL('https://x.com/intent/post');
+    intent.searchParams.set('text', body);
+    let popup;
+    try {
+      popup = window.open('', '_blank');
+      if (popup) {
+        popup.opener = null;
+        popup.location.replace(intent.href);
+        return;
+      }
+    } catch (_) {
+      try { if (popup) popup.close(); } catch (_) {}
+    }
+    field.value = body;
+    delete status.dataset.i18n; status.textContent = '';
+    if (!dialog.open) dialog.showModal();
+    field.focus();
+    field.select();
+  };
+  document.getElementById('commonShareCopy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(field.value);
+      window.gameI18n.text(status,'copied');
+    } catch (_) {
+      field.focus();
+      field.select();
+      window.gameI18n.text(status,'copyManual');
+    }
+  });
+  document.getElementById('commonShareClose').addEventListener('click', () => dialog.close());
+})();
+</script>
 
-  <script>
-    const GAME_TITLE = 'あなたの1秒って';
-    const GAME_DESCRIPTION = '最初の3秒だけ時計を見て、あとは体感で秒数を当てるゲームです。';
-    const GAME_URL_PLACEHOLDER = 'https://chameleonjp-lab.github.io/anatano_1byou/';
-
+<script id="game-audio">
+(() => {
+  'use strict';
+  const read=key=>{try{return localStorage.getItem(key);}catch{return null;}};
+  const write=(key,value)=>{try{localStorage.setItem(key,String(value));}catch{}};
+  let enabled=read('anatano_1byou-sound')!=='off';
+  const saved=read('anatano_1byou-volume');
+  let volume=saved!==null&&saved.trim()!==''&&Number.isFinite(Number(saved))&&Number(saved)>=0&&Number(saved)<=1?Number(saved):0.3;
+  let context=null,generation=0;
+  const voices=new Set(),lastPlayed=new Map();
+  function stop(){generation++;for(const voice of [...voices]){try{voice.stop();}catch{}}voices.clear();}
+  async function play(event) {
+    if(!enabled||volume===0||document.hidden)return;
+    const requestedAt=performance.now(),requestGeneration=generation;
+    if(requestedAt-(lastPlayed.get(event)??-Infinity)<80)return;
+    lastPlayed.set(event,requestedAt);
+    try{
+      const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
+      if(!context){context=new Audio();context.onstatechange=()=>{if(context.state!=='running')stop();};}
+      if(context.state!=='running'){void context.resume().catch(()=>{});return;}
+      if(context.state!=='running'||!enabled||volume===0||document.hidden||requestGeneration!==generation||performance.now()-requestedAt>250)return;
+      // A completion tone replaces the final tap tone; no timer/tick cue is emitted.
+      if(['finish','retire','best'].includes(event))stop();
+      if(voices.size>=8)return;
+      const oscillator=context.createOscillator(),gain=context.createGain();
+      const frequency={start:440,tap:660,finish:880,retire:220,best:1100}[event];if(!frequency)return;
+      const duration=event==='tap'?0.07:0.16;
+      oscillator.type='sine';oscillator.frequency.value=frequency;
+      gain.gain.setValueAtTime(0.0001,context.currentTime);
+      gain.gain.linearRampToValueAtTime(Math.max(0.0001,volume*volume*0.3),context.currentTime+0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001,context.currentTime+duration);
+      let cleaned=false;
+      const cleanup=()=>{if(cleaned)return;cleaned=true;voices.delete(voice);try{oscillator.disconnect();}catch{}try{gain.disconnect();}catch{}};
+      const voice={stop(){try{oscillator.stop();}catch{}finally{cleanup();}}};
+      voices.add(voice);oscillator.onended=cleanup;
+      try{oscillator.connect(gain);gain.connect(context.destination);}catch{cleanup();return;}
+      oscillator.start();oscillator.stop(context.currentTime+duration+0.01);
+    }catch{/* Audio permission or device failure never blocks the game. */}
+  }
+  window.gameAudio={play,stop,get enabled(){return enabled},get volume(){return volume},
+    setEnabled(value){enabled=Boolean(value);write('anatano_1byou-sound',enabled?'on':'off');if(!enabled)stop();},
+    setVolume(value){const next=Number(value);if(!Number.isFinite(next))return;volume=Math.max(0,Math.min(1,next));write('anatano_1byou-volume',volume);if(volume===0)stop();}
+  };
+  window.addEventListener('pagehide',stop);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+})();
+</script>
+<script id="score-queue">
+(function (root) {
+  'use strict';
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const copy = value => JSON.parse(JSON.stringify(value));
+  function createScoreQueue({gameSlug, scoreOrder = 'asc', storage = null, send, onChange = () => {}, uuid = () => root.crypto.randomUUID()}) {
+    if (!['asc','desc'].includes(scoreOrder)) throw new Error('Invalid score order');
+    const int4 = value => Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
+    const prefix = gameSlug + ':score-pending:v1:';
+    const memory = new Map(), conflicts = new Set();
+    let operation = null;
+    const same = (a,b) => ['p_submission_id','p_display_name','p_game_slug','p_score','p_client_version'].every(k=>a?.[k]===b?.[k]);
+    function valid(item) {
+      const p = item?.payload;
+      return UUID.test(item?.id || '') && p?.p_submission_id === item.id && p.p_game_slug === gameSlug &&
+        typeof p.p_display_name === 'string' && p.p_display_name.trim() !== '' &&
+        typeof p.p_client_version === 'string' && Number.isSafeInteger(p.p_score) && p.p_score >= 0 &&
+        ['pending','sending','rejected','submitted'].includes(item.state);
+    }
+    function reconcile(id, raw) {
+      if(raw===null)return;
+      let item;try{item=JSON.parse(raw);}catch{conflicts.add(id);return;}
+      if(!valid(item)||item.id!==id){conflicts.add(id);return;}
+      const old=memory.get(id);
+      if(old&&!same(old.payload,item.payload)){conflicts.add(id);return;}
+      if(!old || item.state==='submitted' || (item.state==='rejected'&&old.state!=='submitted'))memory.set(id,item);
+    }
+    function save(item) {
+      memory.set(item.id, copy(item));
+      try {
+        if(!storage)return false;
+        reconcile(item.id,storage.getItem(prefix+item.id));
+        if(conflicts.has(item.id))return false;
+        const known=memory.get(item.id);
+        if(known.state==='submitted'&&item.state!=='submitted')return false;
+        const raw=JSON.stringify(item);
+        storage.setItem(prefix+item.id,raw);
+        return storage.getItem(prefix+item.id)===raw;
+      } catch { return false; }
+    }
+    function list() {
+      try {
+        if (storage) for (let i = 0; i < storage.length; i++) {
+          const key = storage.key(i);
+          if (!key?.startsWith(prefix)) continue;
+          reconcile(key.slice(prefix.length),storage.getItem(key));
+        }
+      } catch { /* Retain all session records when storage cannot be read. */ }
+      return [...memory.values()].filter(item=>item.state!=='submitted').map(item=>({...copy(item),state:conflicts.has(item.id)?'conflict':item.state})).sort((a,b) => a.createdAt - b.createdAt || a.id.localeCompare(b.id));
+    }
+    function notify(item, receipt = null) { try { onChange(copy(item), receipt && copy(receipt)); } catch {} }
+    function capture(name, clientVersion) {
+      if (!name?.trim()) return null;
+      try { const id = uuid(); if (!UUID.test(id)) return null; return Object.freeze({id, name:name.trim(), clientVersion}); }
+      catch { return null; }
+    }
+    function enqueue(play, score, presentation = null) {
+      if (!play) return null;
+      list();
+      if(conflicts.has(play.id))throw new Error('Conflicting saved play; original data preserved');
+      const existing = memory.get(play.id);
+      const payload = {p_submission_id:play.id,p_display_name:play.name,p_game_slug:gameSlug,p_score:score,p_client_version:play.clientVersion};
+      if (existing) {
+        if (!same(existing.payload,payload)) throw new Error('A finalized play cannot change');
+        return copy(existing);
+      }
+      const item = {id:play.id,payload,presentation:copy(presentation),createdAt:Date.now(),state:'pending'};
+      if (!valid(item)) throw new Error('Invalid finalized score');
+      const persisted=save(item);notify({...item,persisted});return {...copy(item),persisted};
+    }
+    function drain() {
+      if (operation) return operation;
+      operation = (async () => {
+        const attempted = new Set();
+        for (;;) {
+          const item = list().find(value => !attempted.has(value.id) && !['rejected','conflict'].includes(value.state));
+          if (!item) break;
+          attempted.add(item.id);item.state='sending';
+          if(!save(item)){item.state='pending';if(!conflicts.has(item.id)&&memory.get(item.id)?.state!=='submitted')memory.set(item.id,copy(item));notify({...item,persisted:false});continue;}
+          notify({...item,persisted:true});
+          try {
+            const response = await send(copy(item.payload));
+            if(!Array.isArray(response)||response.length!==1)throw new Error('Invalid score acknowledgement');
+            const receipt = response[0];
+            if (receipt?.accepted === false) { const error=new Error('Score rejected');error.code='PT422';throw error; }
+            if (receipt?.accepted !== true) throw new Error('Invalid score acknowledgement');
+            if (receipt.result_display_name !== item.payload.p_display_name || receipt.result_normalized_name !== item.payload.p_display_name || !int4(receipt.result_first_score) || !int4(receipt.result_best_score) || !int4(receipt.result_play_count) || receipt.result_play_count < 1 || !['was_duplicate','is_first_play','is_new_best'].every(k=>typeof receipt[k]==='boolean')) throw new Error('Invalid score acknowledgement');
+            // The normal SQL receipt includes this submitted score in its best.
+            if (scoreOrder === 'asc' ? receipt.result_best_score > item.payload.p_score : receipt.result_best_score < item.payload.p_score) throw new Error('Invalid score acknowledgement');
+            list();
+            if(conflicts.has(item.id)){notify({...item,state:'conflict'});continue;}
+            item.state='submitted';
+            save(item); // Keep a tombstone. Never recreate a completed receipt on a repeated result callback.
+            notify(item, receipt);
+          } catch (error) {
+            list();
+            if(conflicts.has(item.id)||memory.get(item.id)?.state==='submitted')continue;
+            item.state = ['PT409','PT422','22023','22001','22003'].includes(error?.code) ? 'rejected' : 'pending';
+            const persisted=save(item);notify({...item,persisted});
+          }
+        }
+      })().finally(() => { operation=null; });
+      return operation;
+    }
+    return {capture,enqueue,list,drain,prefix};
+  }
+  const api={createScoreQueue};
+  if (typeof module === 'object' && module.exports) module.exports=api;
+  root.CommonScoreQueue=api;
+})(typeof globalThis === 'object' ? globalThis : this);
+</script>
+<script>
+    const {t, text: setText} = window.gameI18n;
     const SUPABASE_URL = 'https://mlpnjgezrnhdxsxolyzj.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM';
     const GAME_SLUG = 'anatano_1byou';
-    const CLIENT_VERSION = 'anatano_1byou_v1.16_layout_fix';
+    const CLIENT_VERSION = 'anatano_1byou_common_20261031';
     const SCORE_SCALE = 100;
-    const RANKING_LIMIT = 10;
+    const RANKING_LIMIT = 30;
 
     const BEST_KEY = 'anatano_1byo_best_score_v1';
     const LAST_KEY = 'anatano_1byo_last_result_v1';
-    const PLAYER_NAME_KEY = 'chameleonjp_player_name_v1';
+    const LEGACY_PLAYER_NAME_KEY = 'chameleonjp_player_name_v1';
+    const PLAYER_NAME_KEY = 'anatano_1byou_player_name_v2';
+    const RESULT_KEY = 'anatano_1byou_result_v2';
 
     const MAX_SECONDS = 40;
     const VISIBLE_CLOCK_SECONDS = 3;
@@ -859,16 +1125,16 @@
       bestUpdate: document.getElementById('bestUpdate'),
       rankingStatus: document.getElementById('rankingStatus'),
       rankingArea: document.getElementById('rankingArea'),
+      rankingReadStatus: document.getElementById('rankingReadStatus'),
+      retrySendBtn: document.getElementById('retrySendBtn'),
+      retryRankingBtn: document.getElementById('retryRankingBtn'),
       bestRankingList: document.getElementById('bestRankingList'),
       firstRankingList: document.getElementById('firstRankingList'),
       shareResultBtn: document.getElementById('shareResultBtn'),
       retryBtn: document.getElementById('retryBtn'),
       finishBtn: document.getElementById('finishBtn'),
-      nameModal: document.getElementById('nameModal'),
       playerNameInput: document.getElementById('playerNameInput'),
       nameError: document.getElementById('nameError'),
-      nameOkBtn: document.getElementById('nameOkBtn'),
-      nameCancelBtn: document.getElementById('nameCancelBtn'),
       toast: document.getElementById('toast')
     };
 
@@ -879,7 +1145,9 @@
     let toastTimerId = null;
     let latestShareText = '';
     let resultToken = 0;
-    let pendingStartAfterName = false;
+    let rankingRequestId = 0;
+    let scoreQueue;
+    let resultStored=true;
 
     function createEmptyGame() {
       return {
@@ -892,7 +1160,10 @@
         finalScore: null,
         senseResult: null,
         bestUpdated: false,
-        playerName: ''
+        playerName: '',
+        play: null,
+        submissionStatus: '',
+        finalized: false
       };
     }
 
@@ -910,7 +1181,7 @@
 
     function formatSeconds(value) {
       const safeValue = Number.isFinite(value) ? Math.max(0, value) : 0;
-      return safeValue.toFixed(2) + '秒';
+      return t('seconds',{value:safeValue.toFixed(2)});
     }
 
     function getElapsedSeconds() {
@@ -958,12 +1229,12 @@
     }
 
     function getPlayerName() {
-      const raw = safeGetItem(PLAYER_NAME_KEY);
-      return raw ? raw.trim().slice(0, 20) : '';
+      const raw = safeGetItem(PLAYER_NAME_KEY) ?? safeGetItem(LEGACY_PLAYER_NAME_KEY);
+      return raw ? Array.from(raw.trim()).slice(0, 20).join('') : '';
     }
 
     function savePlayerName(name) {
-      safeSetItem(PLAYER_NAME_KEY, name.trim().slice(0, 20));
+      safeSetItem(PLAYER_NAME_KEY, Array.from(name.trim()).slice(0, 20).join(''));
     }
 
     function getSupabasePublishableKey() {
@@ -1009,15 +1280,15 @@
     function renderHome() {
       const savedBest = getSavedBestScore();
       if (savedBest !== null) {
-        elements.bestDisplay.textContent = 'ベストスコア（合計誤差）：' + formatSeconds(savedBest);
+        setText(elements.bestDisplay,'bestScore',{score:savedBest.toFixed(2)});
       } else {
-        elements.bestDisplay.textContent = 'ベストスコア（合計誤差）：まだありません';
+        setText(elements.bestDisplay,'bestNone');
       }
 
       const playerName = getPlayerName();
       if (playerName) {
         elements.playerNameDisplay.hidden = false;
-        elements.playerNameDisplay.textContent = 'ランキング名：' + playerName;
+        setText(elements.playerNameDisplay,'playerName',{name:playerName});
       } else {
         elements.playerNameDisplay.hidden = true;
         elements.playerNameDisplay.textContent = '';
@@ -1026,7 +1297,7 @@
       const last = safeGetItem(LAST_KEY);
       if (last && savedBest === null) {
         elements.lastDisplay.hidden = false;
-        elements.lastDisplay.textContent = '前回：' + last;
+        setText(elements.lastDisplay,'lastResult',{result:getResultLabel({'クリア':'clear','時間切れ':'timeout','リタイア':'retire'}[last]||last)});
       } else {
         elements.lastDisplay.hidden = true;
         elements.lastDisplay.textContent = '';
@@ -1040,82 +1311,45 @@
       game.targets.forEach((target) => {
         const span = document.createElement('span');
         span.className = 'target-pill';
-        span.textContent = target + '秒';
+        setText(span,'seconds',{value:target});
         elements.targetList.appendChild(span);
       });
     }
 
     function resetTapSlots() {
       elements.tapResults.forEach((slot) => {
-        slot.textContent = '--.--秒';
+        setText(slot,'seconds',{value:'--.--'});
       });
     }
 
     function requestStartGame() {
-      const playerName = getPlayerName();
-      if (playerName) {
-        startGame(playerName);
-        return;
-      }
-
-      pendingStartAfterName = true;
-      showNameModal();
-    }
-
-    function showNameModal() {
-      elements.nameError.textContent = '';
-      elements.playerNameInput.value = getPlayerName();
-      elements.nameModal.hidden = false;
-      setTimeout(() => elements.playerNameInput.focus(), 50);
-    }
-
-    function hideNameModal() {
-      elements.nameModal.hidden = true;
-      elements.playerNameInput.blur();
-      elements.nameError.textContent = '';
-      pendingStartAfterName = false;
-    }
-
-    function confirmPlayerName() {
-      const name = elements.playerNameInput.value.trim();
-      if (!name) {
-        elements.nameError.textContent = '名前を入力してください';
-        return;
-      }
-
-      if (name.length > 20) {
-        elements.nameError.textContent = '名前は20文字以内にしてください';
-        return;
-      }
-
+      const name=elements.playerNameInput.value.trim();
+      if(Array.from(name).length>20){setText(elements.nameError,'nameTooLong');elements.playerNameInput.focus();return;}
       savePlayerName(name);
+      delete elements.nameError.dataset.i18n;elements.nameError.textContent='';
       elements.playerNameInput.blur();
-      elements.nameModal.hidden = true;
-      elements.nameError.textContent = '';
-
-      if (pendingStartAfterName) {
-        pendingStartAfterName = false;
-        setTimeout(() => startGame(name), 250);
-      } else {
-        renderHome();
-      }
+      startGame(name);
     }
 
     function startGame(playerName) {
       clearAllTimers();
       game = createEmptyGame();
       game.phase = 'countdown';
-      game.playerName = playerName || getPlayerName();
+      game.playerName = playerName || '';
+      game.play = scoreQueue.capture(game.playerName, CLIENT_VERSION);
+      resultToken += 1; rankingRequestId += 1;
+      safeSetItem(RESULT_KEY, '');
       game.targets = generateTargets();
 
       renderTargets();
       resetTapSlots();
-      elements.statusText.textContent = '準備中';
+      setText(elements.statusText,'preparing');
       elements.clockDisplay.className = 'clock';
-      elements.clockDisplay.textContent = '3';
+      delete elements.clockDisplay.dataset.i18n; elements.clockDisplay.textContent = '3';
       elements.tapBtn.disabled = true;
       showScreen('game');
 
+      void window.gameAudio.play('start');
       runCountdown(3);
     }
 
@@ -1124,14 +1358,14 @@
 
       if (number > 0) {
         elements.clockDisplay.className = 'clock';
-        elements.clockDisplay.textContent = String(number);
-        elements.statusText.textContent = '準備中';
+        delete elements.clockDisplay.dataset.i18n; elements.clockDisplay.textContent = String(number);
+        setText(elements.statusText,'preparing');
         countdownTimerId = setTimeout(() => runCountdown(number - 1), 1000);
         return;
       }
 
       elements.clockDisplay.className = 'clock note';
-      elements.clockDisplay.textContent = 'スタート';
+      setText(elements.clockDisplay,'go');
       countdownTimerId = setTimeout(beginMeasurement, 650);
     }
 
@@ -1140,7 +1374,7 @@
 
       game.phase = 'playing';
       game.startedAt = performance.now();
-      elements.statusText.textContent = '計測中';
+      setText(elements.statusText,'measuring',{count:0,total:TARGET_COUNT});
       elements.tapBtn.disabled = false;
       updateClock();
       tickTimerId = setInterval(updateClock, 30);
@@ -1158,13 +1392,13 @@
 
       if (elapsed <= VISIBLE_CLOCK_SECONDS) {
         elements.clockDisplay.className = 'clock';
-        elements.clockDisplay.textContent = formatSeconds(elapsed);
+        setText(elements.clockDisplay,'seconds',{value:elapsed.toFixed(2)});
       } else {
         elements.clockDisplay.className = 'clock note';
-        elements.clockDisplay.textContent = '感覚で\n押してください';
+        setText(elements.clockDisplay,'feelTime');
       }
 
-      elements.statusText.textContent = '計測中 ' + game.taps.length + ' / ' + TARGET_COUNT;
+      setText(elements.statusText,'measuring',{count:game.taps.length,total:TARGET_COUNT});
     }
 
     function handleTap() {
@@ -1179,9 +1413,10 @@
       if (game.taps.length >= TARGET_COUNT) return;
 
       game.taps.push(elapsed);
+      if(game.taps.length<TARGET_COUNT)void window.gameAudio.play('tap');
       const index = game.taps.length - 1;
-      elements.tapResults[index].textContent = formatSeconds(elapsed);
-      elements.statusText.textContent = '計測中 ' + game.taps.length + ' / ' + TARGET_COUNT;
+      setText(elements.tapResults[index],'seconds',{value:elapsed.toFixed(2)});
+      setText(elements.statusText,'measuring',{count:game.taps.length,total:TARGET_COUNT});
 
       if (game.taps.length >= TARGET_COUNT) {
         finishGame('clear');
@@ -1200,13 +1435,15 @@
       clearAllTimers();
       elements.tapBtn.disabled = true;
       game.resultType = type;
+      void window.gameAudio.play(type==='clear'?'finish':'retire');
       game.endedAt = wasCountdown ? 0 : getElapsedSeconds();
+      finalizeResult();
 
       if (type === 'clear') {
         game.phase = 'ending';
-        elements.statusText.textContent = '終了';
+        setText(elements.statusText,'ended');
         elements.clockDisplay.className = 'clock note';
-        elements.clockDisplay.textContent = '計測終了！\n結果を確認します';
+        setText(elements.clockDisplay,'measurementEnded');
         endMessageTimerId = setTimeout(() => showResult(), 1000);
         return;
       }
@@ -1248,16 +1485,12 @@
 
     function getSenseLabel(driftPerSecond) {
       const abs = Math.abs(driftPerSecond);
-      if (abs < 0.005) return 'ほぼぴったり';
-      return driftPerSecond > 0 ? '実際より少しゆっくりめ' : '実際より少し早め';
+      if (abs < 0.005) return 'senseExact';
+      return driftPerSecond > 0 ? 'senseSlow' : 'senseFast';
     }
 
-    function showResult() {
-      clearAllTimers();
-      game.phase = 'result';
-      resultToken += 1;
-      const currentToken = resultToken;
-
+    function finalizeResult() {
+      if(game.finalized)return;
       const rows = calculateRows();
       const completed = game.resultType === 'clear';
       const totalDiff = completed
@@ -1281,26 +1514,39 @@
         safeSetItem(LAST_KEY, 'リタイア');
       }
 
-      renderResult(rows);
-      showScreen('result');
-      syncRankingAfterResult(rows, currentToken);
+      game.finalized=true;
+      game.submissionStatus = completed ? (game.playerName ? (game.play ? 'pending' : 'failed') : 'guest') : 'notSubmitted';
+      const snapshot={...game,phase:'result'};
+      // Persist at the final tap, before the existing one-second result animation.
+      saveResultSnapshot(true);
+      if(completed&&game.playerName&&game.play){
+        try{scoreQueue.enqueue(game.play,scoreSecondsToSubmit(game.finalScore),snapshot);}
+        catch{game.submissionStatus='rejected';saveResultSnapshot(true);}
+      }
+    }
+    function showResult() {
+      clearAllTimers();
+      game.phase='result';resultToken+=1;
+      finalizeResult();
+      if(game.bestUpdated)void window.gameAudio.play('best');
+      saveResultSnapshot();resetRankingDisplay();renderResult(calculateRows());showScreen('result');
+      syncRankingAfterResult(calculateRows(),resultToken);
     }
 
     function renderResult(rows) {
       const resultLabel = getResultLabel(game.resultType);
-      elements.resultState.textContent = '結果：' + resultLabel;
+      setText(elements.resultState,'result',{result:resultLabel});
       elements.bestUpdate.hidden = !game.bestUpdated;
-      resetRankingDisplay();
 
       if (game.resultType === 'clear') {
-        elements.resultSummary.textContent = 'タップ回数：3回 / 3回';
-        elements.finalScore.textContent = '最終スコア：' + formatSeconds(game.finalScore);
+        setText(elements.resultSummary,'tapCount',{count:3,total:3});
+        setText(elements.finalScore,'finalScore',{score:game.finalScore.toFixed(2)});
       } else if (game.resultType === 'timeout') {
-        elements.resultSummary.textContent = '経過秒数：' + formatSeconds(MAX_SECONDS) + ' / タップ回数：' + game.taps.length + '回 / 3回';
-        elements.finalScore.textContent = '最終スコア：時間切れ';
+        setText(elements.resultSummary,'elapsedTaps',{seconds:MAX_SECONDS.toFixed(2),count:game.taps.length,total:3});
+        setText(elements.finalScore,'finalState',{result:t('timeout')});
       } else {
-        elements.resultSummary.textContent = '経過秒数：' + formatSeconds(game.endedAt) + ' / タップ回数：' + game.taps.length + '回 / 3回';
-        elements.finalScore.textContent = '最終スコア：リタイア';
+        setText(elements.resultSummary,'elapsedTaps',{seconds:game.endedAt.toFixed(2),count:game.taps.length,total:3});
+        setText(elements.finalScore,'finalState',{result:t('retire')});
       }
 
       renderSenseScore();
@@ -1309,11 +1555,10 @@
       rows.forEach((row, index) => {
         const div = document.createElement('div');
         div.className = 'result-row';
-        div.innerHTML = `
-          <strong>お題${index + 1}：${row.target}秒</strong>
-          タップ：${Number.isFinite(row.tap) ? formatSeconds(row.tap) : '未タップ'}<br />
-          差分：${Number.isFinite(row.diff) ? formatSeconds(row.diff) : 'なし'}
-        `;
+        const target=document.createElement('strong');setText(target,'rowTarget',{n:index+1,seconds:row.target});
+        const tap=document.createElement('div');setText(tap,'rowTap',{value:Number.isFinite(row.tap)?formatSeconds(row.tap):t('noTap')});
+        const diff=document.createElement('div');setText(diff,'rowDiff',{value:Number.isFinite(row.diff)?formatSeconds(row.diff):t('none')});
+        div.append(target,tap,diff);
         elements.resultList.appendChild(div);
       });
 
@@ -1330,51 +1575,36 @@
       const sense = game.senseResult;
       const driftPrefix = sense.driftPerSecond >= 0 ? '+' : '';
       elements.senseScore.hidden = false;
-      elements.senseScore.innerHTML = `
-        あなたの1秒感覚：${sense.oneSecondSense.toFixed(2)}秒<br />
-        1秒あたりのズレ：${driftPrefix}${sense.driftPerSecond.toFixed(3)}秒
-        <small>平均ズレ：${formatSeconds(sense.averageDiff)} / ${sense.label}</small>
-      `;
+      elements.senseScore.replaceChildren();
+      for(const [key,params,tag] of [
+        ['senseOne',{seconds:sense.oneSecondSense.toFixed(2)},'div'],
+        ['senseDrift',{seconds:driftPrefix+sense.driftPerSecond.toFixed(3)},'div'],
+        ['senseAverage',{seconds:sense.averageDiff.toFixed(2),label:t(sense.label)},'small']
+      ]) {const node=document.createElement(tag);setText(node,key,params);elements.senseScore.appendChild(node);}
     }
 
     function getResultLabel(type) {
-      if (type === 'clear') return 'クリア';
-      if (type === 'timeout') return '時間切れ';
-      return 'リタイア';
+      if (type === 'clear') return t('clear');
+      if (type === 'timeout') return t('timeout');
+      return t('retire');
     }
 
     function buildResultShareText(rows) {
-      const label = getResultLabel(game.resultType);
-      if (game.resultType === 'clear') {
-        return [
-          GAME_TITLE + ' 結果',
-          '結果：クリア',
-          'お題：' + game.targets.map((target) => target + '秒').join(' / '),
-          'タップ：' + game.taps.map((tap) => formatSeconds(tap)).join(' / '),
-          '最終スコア：' + formatSeconds(game.finalScore),
-          game.senseResult
-            ? 'あなたの1秒感覚：' + game.senseResult.oneSecondSense.toFixed(2) + '秒（' + game.senseResult.label + '）'
-            : ''
-        ].filter(Boolean).join('\n');
-      }
-
-      return [
-        GAME_TITLE + ' 結果',
-        '結果：' + label,
-        '経過秒数：' + formatSeconds(game.resultType === 'timeout' ? MAX_SECONDS : game.endedAt),
-        'タップ回数：' + game.taps.length + '回 / 3回'
-      ].join('\n');
+      const parts=[t('shareResultTitle',{game:t('gameTitle')}),t('result',{result:getResultLabel(game.resultType)})];
+      if(game.resultType==='clear') {
+        parts.push(t('shareTargets',{targets:game.targets.map(value=>t('seconds',{value})).join(' / ')}),
+          t('shareTaps',{taps:game.taps.map(formatSeconds).join(' / ')}),t('finalScore',{score:game.finalScore.toFixed(2)}));
+        if(game.senseResult)parts.push(t('senseOne',{seconds:game.senseResult.oneSecondSense.toFixed(2)}));
+      }else parts.push(t('elapsed',{seconds:(game.resultType==='timeout'?MAX_SECONDS:game.endedAt).toFixed(2)}),t('tapCount',{count:game.taps.length,total:3}));
+      return parts.join('\n');
     }
 
     function getGameShareUrl() {
-      if (location.protocol === 'http:' || location.protocol === 'https:') {
-        return location.href.split('#')[0];
-      }
-      return GAME_URL_PLACEHOLDER;
+      return 'https://chameleonjp.codeberg.page/anatano_1byou/';
     }
 
     function buildGameShareText() {
-      return [GAME_TITLE, GAME_DESCRIPTION, getGameShareUrl()].join('\n');
+      return [t('gameTitle'), t('shareDescription'), getGameShareUrl()].join('\n');
     }
 
     function scoreSecondsToSubmit(scoreSeconds) {
@@ -1388,33 +1618,30 @@
     }
 
     async function callSupabaseRpc(functionName, payload) {
-      if (!hasSupabaseConfig()) {
-        throw new Error('Publishable key is not configured.');
-      }
-
-      const key = getSupabasePublishableKey();
-      const response = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + functionName, {
-        method: 'POST',
-        headers: {
-          apikey: key,
-          Authorization: 'Bearer ' + key,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const text = await response.text().catch(() => '');
-        throw new Error(functionName + ' failed: ' + response.status + ' ' + text);
-      }
-
-      const text = await response.text();
-      return text ? JSON.parse(text) : null;
+      if (!hasSupabaseConfig()) throw new Error('Publishable key is not configured.');
+      const key=getSupabasePublishableKey(),controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),10000);
+      try {
+        const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+functionName,{
+          method:'POST',signal:controller.signal,
+          headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        });
+        const text=await response.text();
+        if(!response.ok){
+          let detail;try{detail=JSON.parse(text);}catch{}
+          throw Object.assign(new Error(functionName+' failed: '+response.status),{code:detail?.code});
+        }
+        return text?JSON.parse(text):null;
+      }finally{clearTimeout(timeout);}
     }
 
     function resetRankingDisplay() {
       elements.rankingStatus.hidden = true;
-      elements.rankingStatus.textContent = '';
+      delete elements.rankingStatus.dataset.i18n; elements.rankingStatus.textContent = '';
+      elements.rankingReadStatus.hidden = true;
+      elements.retrySendBtn.hidden = true;
+      elements.retryRankingBtn.hidden = true;
       elements.rankingArea.hidden = true;
       elements.bestRankingList.innerHTML = '';
       elements.firstRankingList.innerHTML = '';
@@ -1422,7 +1649,7 @@
 
     function setRankingStatus(message) {
       elements.rankingStatus.hidden = false;
-      elements.rankingStatus.textContent = message;
+      setText(elements.rankingStatus,message);
     }
 
     function isSubmitRejected(result) {
@@ -1430,73 +1657,76 @@
       return Boolean(row && row.accepted === false);
     }
 
-    async function syncRankingAfterResult(rows, token) {
-      if (!hasSupabaseConfig()) {
-        setRankingStatus('ランキング連携：Publishable key設定後に有効になります');
-        return;
+    function saveResultSnapshot(finalized=false) {
+      if(game.phase!=='result'&&!finalized)return;
+      try{const raw=JSON.stringify({...game,phase:'result'});safeSetItem(RESULT_KEY,raw);resultStored=safeGetItem(RESULT_KEY)===raw;}catch{resultStored=false;}
+    }
+    function renderSubmissionStatus() {
+      const keys={guest:'guestResult',notSubmitted:'notSubmitted',pending:'scorePending',sending:'rankingSending',submitted:'rankingSent',failed:'rankingSendFailed',rejected:'rankingSendFailed'};
+      setRankingStatus(!resultStored||game.submissionStatus==='unsaved'?'resultUnsaved':keys[game.submissionStatus]||'rankingSendFailed');
+      elements.retrySendBtn.hidden=!(game.play&&['pending','failed','unsaved'].includes(game.submissionStatus));
+      elements.retrySendBtn.disabled=game.submissionStatus==='sending';
+    }
+    function syncRankingAfterResult(rows, token) {
+      renderSubmissionStatus();
+      void loadRankings(token);
+      if(game.resultType==='clear'&&Number.isFinite(game.finalScore)&&game.playerName&&game.play){
+        try{scoreQueue.enqueue(game.play,scoreSecondsToSubmit(game.finalScore),game);void scoreQueue.drain();}
+        catch{game.submissionStatus='rejected';saveResultSnapshot();renderSubmissionStatus();}
       }
-
-      let submitSucceeded = false;
-      if (game.resultType === 'clear' && Number.isFinite(game.finalScore)) {
-        setRankingStatus('ランキング送信中…');
-        try {
-          const submitResult = await callSupabaseRpc('submit_score', {
-            p_display_name: game.playerName || getPlayerName(),
-            p_game_slug: GAME_SLUG,
-            p_score: scoreSecondsToSubmit(game.finalScore),
-            p_client_version: CLIENT_VERSION
-          });
-          if (isSubmitRejected(submitResult)) {
-            throw new Error('submit_score rejected this score.');
-          }
-          submitSucceeded = true;
-        } catch (error) {
-          console.warn(error);
-          if (token !== resultToken) return;
-          setRankingStatus('ランキング送信に失敗しました。今回の結果は画面に残ります');
-        }
-      } else {
-        setRankingStatus('ランキング取得中…');
-      }
-
+    }
+    async function loadRankings(token=resultToken) {
+      const requestId=++rankingRequestId;
+      elements.rankingReadStatus.hidden=false;setText(elements.rankingReadStatus,'rankingLoading');
+      elements.retryRankingBtn.hidden=false;elements.retryRankingBtn.disabled=true;
       try {
-        const [bestRanking, firstRanking] = await Promise.all([
-          callSupabaseRpc('get_best_score_ranking', { p_game_slug: GAME_SLUG, p_limit: RANKING_LIMIT }),
-          callSupabaseRpc('get_first_try_ranking', { p_game_slug: GAME_SLUG, p_limit: RANKING_LIMIT })
+        const [bestRanking,firstRanking]=await Promise.all([
+          callSupabaseRpc('get_best_score_ranking',{p_game_slug:GAME_SLUG,p_limit:RANKING_LIMIT}),
+          callSupabaseRpc('get_first_try_ranking',{p_game_slug:GAME_SLUG,p_limit:RANKING_LIMIT})
         ]);
-
-        if (token !== resultToken) return;
-        renderRankingList(elements.bestRankingList, normalizeRankingRows(bestRanking, 'best'));
-        renderRankingList(elements.firstRankingList, normalizeRankingRows(firstRanking, 'first'));
-        elements.rankingArea.hidden = false;
-
-        if (game.resultType === 'clear') {
-          setRankingStatus(submitSucceeded ? 'ランキング送信：完了しました' : 'ランキングを取得しました');
-        } else {
-          setRankingStatus('ランキングを取得しました');
-        }
-      } catch (error) {
-        console.warn(error);
-        if (token !== resultToken) return;
-        if (game.resultType === 'clear' && !submitSucceeded) return;
-        setRankingStatus('ランキング取得に失敗しました。結果表示はそのまま残ります');
+        if(token!==resultToken||requestId!==rankingRequestId||game.phase!=='result')return;
+        renderRankingList(elements.bestRankingList,normalizeRankingRows(bestRanking,'best'));
+        renderRankingList(elements.firstRankingList,normalizeRankingRows(firstRanking,'first'));
+        elements.rankingArea.hidden=false;setText(elements.rankingReadStatus,'rankingLoaded');
+      }catch{
+        if(token!==resultToken||requestId!==rankingRequestId||game.phase!=='result')return;
+        setText(elements.rankingReadStatus,'rankingLoadFailed');
+      }finally{
+        if(token===resultToken&&requestId===rankingRequestId)elements.retryRankingBtn.disabled=false;
       }
+    }
+    let queueStorage=null;try{queueStorage=localStorage;}catch{}
+    scoreQueue=CommonScoreQueue.createScoreQueue({gameSlug:GAME_SLUG,scoreOrder:'asc',storage:queueStorage,
+      send:payload=>callSupabaseRpc('submit_score_once_shared_v1',payload),
+      onChange(item,receipt){
+        if(game.phase!=='result'||game.play?.id!==item.id)return;
+        game.submissionStatus=item.state==='conflict'?'rejected':item.persisted===false?'unsaved':item.state==='pending'&&game.submissionStatus==='sending'?'failed':item.state;saveResultSnapshot();renderSubmissionStatus();
+        if(receipt)void loadRankings(resultToken);
+      }
+    });
+    function restoreResultSnapshot() {
+      let saved;try{saved=JSON.parse(safeGetItem(RESULT_KEY));}catch{return false;}
+      if(!saved||saved.phase!=='result'||!['clear','retire','timeout'].includes(saved.resultType)||
+        !Array.isArray(saved.targets)||saved.targets.length!==3||!saved.targets.every(n=>Number.isInteger(n)&&n>=TARGET_MIN&&n<=TARGET_MAX)||
+        !Array.isArray(saved.taps)||saved.taps.length>3||!saved.taps.every(n=>Number.isFinite(n)&&n>=0&&n<MAX_SECONDS)||
+        typeof saved.playerName!=='string'||!Number.isFinite(saved.endedAt)||
+        (saved.resultType==='clear'&&(!Number.isFinite(saved.finalScore)||saved.taps.length!==3)))return false;
+      if(!saved.targets.every((n,i)=>i===0||n-saved.targets[i-1]>=MIN_TARGET_GAP)||
+        !saved.taps.every((n,i)=>i===0||n>=saved.taps[i-1])||saved.endedAt<0)return false;
+      if(saved.resultType==='clear'){
+        const computed=roundToTwo(saved.targets.reduce((sum,target,i)=>sum+roundToTwo(Math.abs(roundToTwo(saved.taps[i])-target)),0));
+        if(saved.finalScore!==computed)return false;
+      }else if(saved.finalScore!==null||saved.taps.length>=TARGET_COUNT)return false;
+      if(saved.play!=null&&(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(saved.play.id||'')||
+        saved.play.name!==saved.playerName||typeof saved.play.clientVersion!=='string'))return false;
+      // Display only: a reload never turns an unqueued snapshot into a new submission.
+      game=saved;game.senseResult=game.resultType==='clear'?calculateSenseResult(calculateRows()):null;resultStored=true;resultToken+=1;renderResult(calculateRows());renderSubmissionStatus();showScreen('result');void loadRankings();return true;
     }
 
     function normalizeRankingRows(data, type) {
-      const list = Array.isArray(data) ? data : (data ? [data] : []);
-      return list.map((row) => {
-        const score = type === 'first'
-          ? pickNumber(row, ['first_score', 'result_first_score', 'score', 'best_score', 'result_best_score'])
-          : pickNumber(row, ['best_score', 'result_best_score', 'score', 'first_score', 'result_first_score']);
-
-        return {
-          rank: pickNumber(row, ['rank', 'ranking', 'result_rank']),
-          name: pickText(row, ['display_name', 'result_display_name', 'player_name', 'name']) || '名無し',
-          score,
-          playCount: pickNumber(row, ['play_count', 'result_play_count'])
-        };
-      }).filter((row) => Number.isFinite(row.score));
+      const key=type==='first'?'first_score':'best_score';
+      if(!Array.isArray(data)||data.some(row=>!row||!Number.isInteger(row.rank_no)||row.rank_no<1||typeof row.display_name!=='string'||!Number.isInteger(row[key])))throw new Error('Invalid ranking response');
+      return data.slice(0,RANKING_LIMIT).map(row=>({rank:row.rank_no,name:row.display_name,score:row[key],playCount:Number.isInteger(row.play_count)&&row.play_count>=0?row.play_count:NaN}));
     }
 
     function pickText(row, keys) {
@@ -1515,28 +1745,24 @@
     }
 
     function renderRankingList(container, rows) {
+      delete container.dataset.i18n;
       container.innerHTML = '';
       if (!rows.length) {
-        container.textContent = 'まだ記録がありません';
+        setText(container,'noRecords');
         return;
       }
 
-      let previousScore = null;
-      let previousRank = 0;
-      rows.forEach((row, index) => {
-        const fallbackRank = previousScore !== null && row.score === previousScore ? previousRank : index + 1;
-        const rank = Number.isFinite(row.rank) ? row.rank : fallbackRank;
-        previousScore = row.score;
-        previousRank = rank;
+      rows.slice(0,RANKING_LIMIT).forEach((row) => {
+        const rank = row.rank;
 
         const div = document.createElement('div');
         div.className = 'ranking-row';
-        const playText = Number.isFinite(row.playCount) ? ' / ' + row.playCount + '回' : '';
-        div.innerHTML = `
-          <span class="ranking-rank">${rank}位</span>
-          <span class="ranking-name">${escapeHtml(row.name)}</span>
-          <span class="ranking-score">${scoreIntToDisplay(row.score)}${playText}</span>
-        `;
+        const rankNode=document.createElement('span');rankNode.className='ranking-rank';setText(rankNode,'rank',{rank});
+        const nameNode=document.createElement('span');nameNode.className='ranking-name';
+        if(row.name)nameNode.textContent=row.name;else setText(nameNode,'unnamed');
+        const scoreNode=document.createElement('span');scoreNode.className='ranking-score';
+        setText(scoreNode,Number.isFinite(row.playCount)?'rankingScorePlays':'rankingScore',{score:(row.score/SCORE_SCALE).toFixed(2),plays:row.playCount});
+        div.append(rankNode,nameNode,scoreNode);
         container.appendChild(div);
       });
     }
@@ -1564,7 +1790,7 @@
         const playerCount = pickNumber(row, ['player_count', 'players_count']);
         if (Number.isFinite(totalPlayCount) && Number.isFinite(playerCount)) {
           elements.gameStats.hidden = false;
-          elements.gameStats.textContent = '参加人数：' + playerCount + '人 / プレイ回数：' + totalPlayCount + '回';
+          setText(elements.gameStats,'stats',{players:playerCount,plays:totalPlayCount});
         }
       } catch (error) {
         console.warn(error);
@@ -1588,14 +1814,14 @@
           document.execCommand('copy');
           textarea.remove();
         }
-        showToast('クリップボードにコピーしました');
+        showToast('clipboardCopied');
       } catch (error) {
-        showToast('コピーできませんでした');
+        showToast('copyFailed');
       }
     }
 
     function showToast(message) {
-      elements.toast.textContent = message;
+      setText(elements.toast,message);
       elements.toast.classList.add('show');
       if (toastTimerId !== null) clearTimeout(toastTimerId);
       toastTimerId = setTimeout(() => {
@@ -1617,21 +1843,42 @@
     elements.finishBtn.addEventListener('click', () => {
       clearAllTimers();
       game = createEmptyGame();
+      resultToken += 1; rankingRequestId += 1;
+      safeSetItem(RESULT_KEY,'');
       renderHome();
       showScreen('home');
     });
     elements.tapBtn.addEventListener('click', handleTap);
     elements.retireBtn.addEventListener('click', handleRetire);
-    elements.shareGameBtn.addEventListener('click', () => copyText(buildGameShareText()));
-    elements.shareResultBtn.addEventListener('click', () => copyText(latestShareText));
-    elements.nameOkBtn.addEventListener('click', confirmPlayerName);
-    elements.nameCancelBtn.addEventListener('click', hideNameModal);
+    elements.shareGameBtn.addEventListener('click', () => window.openGameShareX(buildGameShareText()));
+    elements.shareResultBtn.addEventListener('click', () => window.openGameShareX(latestShareText + '\n' + getGameShareUrl()));
+    elements.playerNameInput.addEventListener('change',()=>{
+      const name=elements.playerNameInput.value.trim();if(Array.from(name).length<=20)savePlayerName(name);
+    });
+    elements.retrySendBtn.addEventListener('click',()=>{saveResultSnapshot();renderSubmissionStatus();void scoreQueue.drain();});
+    elements.retryRankingBtn.addEventListener('click',()=>{void loadRankings();});
+    window.addEventListener('online',()=>{void scoreQueue.drain();});
     elements.playerNameInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') confirmPlayerName();
+      if (event.key === 'Enter' && !event.isComposing && event.keyCode !== 229) { event.preventDefault(); requestStartGame(); }
     });
 
+    window.addEventListener('gamelanguagechange',()=>{
+      // Reformat only presentation. Never restart a timer, regenerate targets, or resubmit.
+      if(game.phase==='result')renderResult(calculateRows());
+      const last=safeGetItem(LAST_KEY);
+      if(last&&!elements.lastDisplay.hidden)setText(elements.lastDisplay,'lastResult',{result:getResultLabel({'クリア':'clear','時間切れ':'timeout','リタイア':'retire'}[last]||last)});
+    });
+    const soundToggle=document.getElementById('soundToggle'),soundVolume=document.getElementById('soundVolume');
+    function renderAudioControls(){soundToggle.setAttribute('aria-pressed',String(window.gameAudio.enabled));setText(soundToggle,window.gameAudio.enabled?'soundOn':'soundOff');soundVolume.value=String(window.gameAudio.volume);}
+    soundToggle.addEventListener('click',()=>{window.gameAudio.setEnabled(!window.gameAudio.enabled);renderAudioControls();});
+    soundVolume.addEventListener('input',()=>{window.gameAudio.setVolume(soundVolume.value);});
+    soundVolume.addEventListener('change',()=>{void window.gameAudio.play('tap');});
+    renderAudioControls();
+    elements.playerNameInput.value=getPlayerName();
+    resetTapSlots();
     renderHome();
-    showScreen('home');
+    if(!restoreResultSnapshot())showScreen('home');
+    void scoreQueue.drain();
 </script>
 </body>
 </html>
