@@ -1232,12 +1232,21 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
       }
     }
 
-    function getSavedBestScore() {
-      const raw = safeGetItem(BEST_KEY);
-      if (raw === null) return null;
+    function readBestRecord() {
+      let raw;
+      try {
+        raw = localStorage.getItem(BEST_KEY);
+      } catch (error) {
+        return {known: false, value: null};
+      }
+      if (raw === null) return {known: true, value: null};
 
       const value = Number(raw);
-      return Number.isFinite(value) ? value : null;
+      return Number.isFinite(value) ? {known: true, value} : {known: false, value: null};
+    }
+
+    function getSavedBestScore() {
+      return readBestRecord().value;
     }
 
     function getPlayerName() {
@@ -1514,10 +1523,15 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
       game.bestUpdated = false;
 
       if (completed && Number.isFinite(totalDiff)) {
-        const savedBest = getSavedBestScore();
-        if (savedBest === null || totalDiff < savedBest) {
-          safeSetItem(BEST_KEY, String(totalDiff));
-          game.bestUpdated = true;
+        const savedBest = readBestRecord();
+        if (savedBest.known && (savedBest.value === null || totalDiff < savedBest.value)) {
+          const raw = String(totalDiff);
+          try {
+            localStorage.setItem(BEST_KEY, raw);
+            game.bestUpdated = localStorage.getItem(BEST_KEY) === raw;
+          } catch (error) {
+            // Do not announce a new best when storage has not confirmed it.
+          }
         }
         safeSetItem(LAST_KEY, 'クリア');
       } else if (game.resultType === 'timeout') {
