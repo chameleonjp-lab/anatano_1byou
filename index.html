@@ -731,14 +731,17 @@
     .clock.note {white-space:pre-line;font-size:clamp(1.2rem,6vw,2rem);}
     .ranking-name {overflow-wrap:anywhere;min-width:0;}
     @media(max-height:700px){.game-card{min-height:420px;height:auto;}.home-card{height:auto;}}
+
+.home-lang-upper-left{display:flex;align-items:center;justify-content:flex-start;gap:8px;max-width:100%;flex-wrap:wrap;text-align:left;margin:0 0 8px}.home-lang-upper-left>div,.home-lang-upper-left>label:has(#languageSelect){display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:8px;max-width:100%;flex-wrap:wrap;width:auto;margin:0}.home-lang-upper-left #languageSelect{width:auto;min-height:44px;max-width:100%;box-sizing:border-box}.home-lang-upper-left #languageStatus{flex-basis:100%;margin:0}.home-lang-upper-left #languageStatus:empty{display:none}
 </style>
 </head>
 <body data-screen="home">
   <main class="app" aria-live="polite">
     <section id="homeScreen" class="screen active">
       <div class="card home-card">
+        <div class="home-lang-upper-left"><label class="language-control"><span data-i18n="language">言語</span><select id="languageSelect" aria-label="言語" data-i18n="language" data-i18n-attr="aria-label"></select></label></div>
         <h1 class="title" data-i18n="gameTitle">あなたの1秒って</h1>
-        <label class="language-control"><span data-i18n="language">言語</span><select id="languageSelect" aria-label="言語" data-i18n="language" data-i18n-attr="aria-label"></select></label>
+        
         <div id="bestDisplay" class="best-box">ベストスコア（合計誤差）：まだありません</div>
         <div class="name-home">
           <label for="playerNameInput" data-i18n="nameTitle">名前を入力</label>
