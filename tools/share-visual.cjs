@@ -12,8 +12,8 @@ async function capture(page,phase,lang){
   const beforeCount=await page.evaluate(()=>window.__shareIntents.length);await page.tap(share);
   const intents=await page.evaluate(()=>window.__shareIntents.slice());assert.equal(intents.length,beforeCount+1,'each viewport tap must create a fresh intent');
   const url=new URL(intents[beforeCount]);assert.equal(url.origin,'https://x.com');assert.equal(url.pathname,'/intent/post');const text=url.searchParams.get('text');
-  assert.equal(text.split('#あなたの1秒って').length-1,1);assert.equal(text.split('#ゲーム制作').length-1,1);assert.ok(text.endsWith('https://chameleonjp.codeberg.page/anatano_1byou/'));
-  if(phase==='home')assert.equal(text,[catalogs[lang].gameTitle,catalogs[lang].shareDescription,'#あなたの1秒って #ゲーム制作','https://chameleonjp.codeberg.page/anatano_1byou/'].join('\n'));
+  assert.equal(text.split('#あなたの1秒って').length-1,1);assert.equal(text.split('#ゲーム制作').length-1,1);assert.ok(text.endsWith('https://chameleonjp-lab.github.io/anatano_1byou/'));
+  if(phase==='home')assert.equal(text,[catalogs[lang].gameTitle,catalogs[lang].shareDescription,'#あなたの1秒って #ゲーム制作','https://chameleonjp-lab.github.io/anatano_1byou/'].join('\n'));
   else{assert.ok(text.includes(catalogs[lang].gameTitle));assert.ok(text.includes(catalogs[lang].finalScore.replace('{score}','0.33')));assert.ok(text.includes(catalogs[lang].result.replace('{result}',catalogs[lang].clear)));}
   assert.equal(await page.locator('#commonShareFallback').evaluate(n=>n.open),false);
  }

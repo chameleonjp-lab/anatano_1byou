@@ -1,5 +1,7 @@
 const {chromium,webkit}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const engine=process.env.BROWSER==='webkit'?webkit:chromium;
+const shareUrl='https://chameleonjp-lab.github.io/anatano_1byou/';
+const retiredShareUrl='https://chameleonjp.codeberg.page/anatano_1byou/';
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 (async()=>{
 const root=path.resolve(__dirname,'..');const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
@@ -34,7 +36,7 @@ try{
  for(const lang of Object.keys(catalogs)){
   await page.selectOption('#languageSelect',lang);assert.equal(await page.locator('#shareGameBtn').textContent(),catalogs[lang].shareX);
   for(const viewport of [{width:402,height:874},{width:874,height:402}]){await page.setViewportSize(viewport);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,lang+' overflow');}
-  await page.click('#shareGameBtn');const share=await page.locator('#commonShareText').inputValue();assert.ok(share.startsWith(catalogs[lang].gameTitle));assert.ok(share.includes('https://chameleonjp.codeberg.page/anatano_1byou/'));await page.click('#commonShareClose');
+  await page.click('#shareGameBtn');const share=await page.locator('#commonShareText').inputValue();assert.ok(share.startsWith(catalogs[lang].gameTitle));assert.ok(share.endsWith(shareUrl));assert.ok(!share.includes(retiredShareUrl));await page.click('#commonShareClose');
  }
  await page.setViewportSize({width:402,height:874});await page.selectOption('#languageSelect','en');
  async function complete(){await page.evaluate(()=>{clearAllTimers();beginMeasurement();game.startedAt=performance.now()-1200;game.taps=game.targets.map(n=>n+0.11);finishGame('clear')});await page.waitForFunction(()=>document.body.dataset.screen==='result');await page.waitForFunction(()=>document.getElementById('bestRankingList').children.length===30);}
@@ -57,7 +59,7 @@ try{
  const submissionCount=submissions.length;
  for(const lang of Object.keys(catalogs)){
   await page.evaluate(l=>window.gameI18n.setLanguage(l),lang);assert.equal(await page.evaluate(()=>game.finalScore),0.33);assert.equal(submissions.length,submissionCount);assert.equal(await page.locator('#bestRankingList .ranking-row').count(),30);
-  await page.click('#shareResultBtn');const share=await page.locator('#commonShareText').inputValue();assert.ok(share.includes('0.33'));assert.ok(!share.includes('名前 <>& +'));await page.click('#commonShareClose');
+  await page.click('#shareResultBtn');const share=await page.locator('#commonShareText').inputValue();assert.ok(share.includes('0.33'));assert.ok(!share.includes('名前 <>& +'));assert.ok(share.endsWith(shareUrl));assert.ok(!share.includes(retiredShareUrl));await page.click('#commonShareClose');
  }
  rankMode='race';await page.evaluate(()=>{void loadRankings();void loadRankings();});await page.waitForTimeout(400);assert.equal(await page.locator('#bestRankingList .ranking-name').first().textContent(),'Fresh');
  rankMode='failure';await page.click('#retryRankingBtn');await page.waitForFunction(()=>!document.getElementById('retryRankingBtn').disabled);assert.equal(await page.locator('#rankingReadStatus').textContent(),catalogs.th.rankingLoadFailed);assert.equal(await page.evaluate(()=>game.finalScore),0.33);
