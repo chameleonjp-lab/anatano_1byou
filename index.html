@@ -731,14 +731,17 @@
     .clock.note {white-space:pre-line;font-size:clamp(1.2rem,6vw,2rem);}
     .ranking-name {overflow-wrap:anywhere;min-width:0;}
     @media(max-height:700px){.game-card{min-height:420px;height:auto;}.home-card{height:auto;}}
+
+.home-lang-upper-left{display:flex;align-items:center;justify-content:flex-start;gap:8px;max-width:100%;flex-wrap:wrap;text-align:left;margin:0 0 8px}.home-lang-upper-left>div,.home-lang-upper-left>label:has(#languageSelect){display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:8px;max-width:100%;flex-wrap:wrap;width:auto;margin:0}.home-lang-upper-left #languageSelect{width:auto;min-height:44px;max-width:100%;box-sizing:border-box}.home-lang-upper-left #languageStatus{flex-basis:100%;margin:0}.home-lang-upper-left #languageStatus:empty{display:none}
 </style>
 </head>
 <body data-screen="home">
   <main class="app" aria-live="polite">
     <section id="homeScreen" class="screen active">
       <div class="card home-card">
+        <div class="home-lang-upper-left"><label class="language-control"><span data-i18n="language">言語</span><select id="languageSelect" aria-label="言語" data-i18n="language" data-i18n-attr="aria-label"></select></label></div>
         <h1 class="title" data-i18n="gameTitle">あなたの1秒って</h1>
-        <label class="language-control"><span data-i18n="language">言語</span><select id="languageSelect" aria-label="言語" data-i18n="language" data-i18n-attr="aria-label"></select></label>
+        
         <div id="bestDisplay" class="best-box">ベストスコア（合計誤差）：まだありません</div>
         <div class="name-home">
           <label for="playerNameInput" data-i18n="nameTitle">名前を入力</label>
@@ -852,12 +855,13 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
     const id=String(value||'').replaceAll('_','-').toLowerCase();
     const exact=Object.keys(catalogs).find(lang=>lang.toLowerCase()===id);
     if(exact)return exact;
-    if(id==='zh'||id.startsWith('zh-')){const parts=id.split('-');if(parts.includes('hans'))return 'zh-Hans';if(parts.includes('hant'))return 'zh-Hant';return parts.some(p=>['tw','hk','mo'].includes(p))?'zh-Hant':'zh-Hans';}
+    if(id==='zh'||id.startsWith('zh-')){const fields = id.split('-'); const extension = fields.findIndex((field, i) => i > 0 && /^[a-z0-9]$/.test(field)); const parts = extension < 0 ? fields : fields.slice(0, extension);if(parts.includes('hans'))return 'zh-Hans';if(parts.includes('hant'))return 'zh-Hant';return parts.some(p=>['tw','hk','mo'].includes(p))?'zh-Hant':'zh-Hans';}
     if(id==='pt'||id.startsWith('pt-'))return 'pt-BR';
     const base=id.split('-')[0];return Object.hasOwn(catalogs,base)?base:null;
   }
   let saved=null;try{saved=localStorage.getItem(key);}catch{}
-  let language=normalize(saved)||(navigator.languages||[navigator.language]).map(normalize).find(Boolean)||'en';
+  const preferences = [...(Array.isArray(navigator.languages) ? navigator.languages : []), navigator.language].filter(value => typeof value === 'string' && value.trim());
+  let language=normalize(saved)||preferences.map(value=>normalize(value.trim())).find(Boolean)||(preferences.length?'en':'ja');
   const t=(name,params={})=>String(catalogs[language]?.[name]??catalogs.en[name]??name).replace(/\{(\w+)\}/g,(whole,id)=>Object.hasOwn(params,id)?String(params[id]):whole);
   function render() {
     document.documentElement.lang=language;
