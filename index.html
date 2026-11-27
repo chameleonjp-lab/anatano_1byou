@@ -1399,6 +1399,7 @@ button.common-x-share { background:#000 !important; color:#fff !important; borde
       if (game.phase !== 'countdown') return;
 
       game.phase = 'playing';
+      void import(/* @vite-ignore */ "https://chameleonjp-lab.github.io/chameleonjp_lab/play-start.js").then(module => module.recordPlayStart("anatano_1byou")).catch(() => {});
       game.startedAt = performance.now();
       setText(elements.statusText,'measuring',{count:0,total:TARGET_COUNT});
       elements.tapBtn.disabled = false;
